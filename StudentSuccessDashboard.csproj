@@ -22,6 +22,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.0" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="https://www.schemastore.org/appsscript.json" /></VisualStudio></ProjectExtensions>
 
 </Project>
