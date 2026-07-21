@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StudentSuccessDashboard.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace StudentSuccessDashboard.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
