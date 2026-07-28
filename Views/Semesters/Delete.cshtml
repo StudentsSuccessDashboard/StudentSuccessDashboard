@@ -1,0 +1,53 @@
+﻿@model StudentSuccessDashboard.Models.Semester
+
+@{
+    ViewData["Title"] = "Delete Semester";
+}
+
+<h2>Delete Semester</h2>
+
+<h4>Are you sure you want to delete this semester?</h4>
+
+<hr />
+
+<dl class="row">
+
+    <dt class="col-sm-3">
+        Semester
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.SemesterName
+    </dd>
+
+    <dt class="col-sm-3">
+        Start
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.StartDate.ToShortDateString()
+    </dd>
+
+    <dt class="col-sm-3">
+        End
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.EndDate.ToShortDateString()
+    </dd>
+
+</dl>
+
+<form asp-action="Delete">
+
+    <input type="hidden" asp-for="SemesterId" />
+
+    <button class="btn btn-danger">
+        Delete
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Cancel
+    </a>
+
+</form>
