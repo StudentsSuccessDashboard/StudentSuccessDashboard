@@ -1,0 +1,43 @@
+﻿@model IEnumerable<StudentSuccessDashboard.Models.Semester>
+
+@{
+    ViewData["Title"] = "Semesters";
+}
+
+<h1>Semesters</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        Create New Semester
+    </a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Semester</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.SemesterName</td>
+                <td>@item.StartDate.ToShortDateString()</td>
+                <td>@item.EndDate.ToShortDateString()</td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.SemesterId" class="btn btn-warning btn-sm">Edit</a>
+
+                    <a asp-action="Details" asp-route-id="@item.SemesterId" class="btn btn-info btn-sm">Details</a>
+
+                    <a asp-action="Delete" asp-route-id="@item.SemesterId" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

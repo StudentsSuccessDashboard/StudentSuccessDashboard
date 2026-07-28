@@ -1,0 +1,64 @@
+﻿@model StudentSuccessDashboard.Models.Semester
+
+@{
+    ViewData["Title"] = "Edit Semester";
+}
+
+<h1>Edit Semester</h1>
+
+<form asp-action="Edit">
+
+    <input type="hidden" asp-for="SemesterId" />
+
+    <div class="mb-3">
+        <label asp-for="SemesterName"></label>
+        <input asp-for="SemesterName" class="form-control" />
+        <span asp-validation-for="SemesterName" class="text-danger"></span>
+    </div>
+
+
+    <div class="mb-3">
+        <label asp-for="StartDate"></label>
+        <input asp-for="StartDate" class="form-control" type="date" />
+        <span asp-validation-for="StartDate" class="text-danger"></span>
+    </div>
+
+
+    <div class="mb-3">
+        <label asp-for="EndDate"></label>
+        <input asp-for="EndDate" class="form-control" type="date" />
+        <span asp-validation-for="EndDate" class="text-danger"></span>
+    </div>
+
+
+    <div class="mb-3">
+        <label asp-for="StudentId">
+            Student
+        </label>
+
+        <select asp-for="StudentId"
+                class="form-control"
+                asp-items="ViewBag.StudentId">
+            <option value="">-- Select Student --</option>
+        </select>
+
+        <span asp-validation-for="StudentId" class="text-danger"></span>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">
+        Save Changes
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Back to List
+    </a>
+
+</form>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
