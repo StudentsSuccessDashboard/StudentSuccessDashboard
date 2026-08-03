@@ -41,5 +41,13 @@ namespace StudentSuccessDashboard.Models
         // Navigation Property
         public ICollection<GradeRecord> Grades { get; set; }
             = new List<GradeRecord>();
+
+        // Navigation Property
+        public ICollection<Quiz> Quizzes { get; set; }
+            = new List<Quiz>();
+
+        // Navigation Property
+        public ICollection<Exam> Exams { get; set; }
+            = new List<Exam>();
     }
 }
