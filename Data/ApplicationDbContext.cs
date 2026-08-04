@@ -24,6 +24,10 @@ namespace StudentSuccessDashboard.Data
 
         public DbSet<GradeRecord> GradeRecords { get; set; }
 
+        public DbSet<Quiz> Quizzes { get; set; }
+
+        public DbSet<Exam> Exams { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -45,6 +49,18 @@ namespace StudentSuccessDashboard.Data
                 .WithMany(s => s.Courses)
                 .HasForeignKey(c => c.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Quiz>()
+                .HasOne(q => q.Course)
+                .WithMany(c => c.Quizzes)
+                .HasForeignKey(q => q.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Exam>()
+                .HasOne(e => e.Course)
+                .WithMany(c => c.Exams)
+                .HasForeignKey(e => e.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
