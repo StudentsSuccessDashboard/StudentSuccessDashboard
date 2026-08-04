@@ -61,6 +61,18 @@ namespace StudentSuccessDashboard.Data
                 .WithMany(c => c.Exams)
                 .HasForeignKey(e => e.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StudySession>()
+                .HasOne(s => s.Course)
+                .WithMany(c => c.StudySessions)
+                .HasForeignKey(s => s.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StudySession>()
+                .HasOne(s => s.User)
+                .WithMany(u => u.StudySessions)
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

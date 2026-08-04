@@ -49,5 +49,9 @@ namespace StudentSuccessDashboard.Models
         // Navigation Property
         public ICollection<Exam> Exams { get; set; }
             = new List<Exam>();
+
+        // Navigation Property
+        public ICollection<StudySession> StudySessions { get; set; }
+            = new List<StudySession>();
     }
 }
