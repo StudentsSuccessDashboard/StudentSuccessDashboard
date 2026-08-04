@@ -1,0 +1,16 @@
+namespace StudentSuccessDashboard.Models
+{
+    public class Assignment
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime DueDate { get; set; }
+        public string Priority { get; set; } = "Medium";
+        public string Status { get; set; } = "Not Started";
+        public double PointsPossible { get; set; }
+        
+        // Foreign key linking to Course
+        public int CourseId { get; set; }
+    }
+}
