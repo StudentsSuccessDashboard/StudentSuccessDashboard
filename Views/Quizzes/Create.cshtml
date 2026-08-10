@@ -1,0 +1,61 @@
+@model StudentSuccessDashboard.Models.Quiz
+
+@{
+    ViewData["Title"] = "Create Quiz";
+}
+
+<h1>Create Quiz</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <form asp-action="Create">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="QuizName" class="form-label"></label>
+                <input asp-for="QuizName" class="form-control" />
+                <span asp-validation-for="QuizName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="DueDate" class="form-label"></label>
+                <input asp-for="DueDate" class="form-control" />
+                <span asp-validation-for="DueDate" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PointsPossible" class="form-label"></label>
+                <input asp-for="PointsPossible" class="form-control" />
+                <span asp-validation-for="PointsPossible" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CourseId" class="form-label">Course</label>
+                <select asp-for="CourseId" class="form-select" asp-items="ViewBag.CourseId">
+                    <option value="">-- Select Course --</option>
+                </select>
+                <span asp-validation-for="CourseId" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                Create Quiz
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

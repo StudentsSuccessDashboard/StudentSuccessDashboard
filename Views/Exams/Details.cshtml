@@ -1,0 +1,47 @@
+﻿@model StudentSuccessDashboard.Models.Exam
+
+@{
+    ViewData["Title"] = "Exam Details";
+}
+
+<h1>Exam Details</h1>
+
+<div>
+    <h4>Exam</h4>
+    <hr />
+
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ExamName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.ExamName)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ExamDate)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.ExamDate)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.PointsPossible)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.PointsPossible)
+        </dd>
+
+        <dt class="col-sm-3">
+            Course
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Course.CourseName)
+        </dd>
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.ExamId" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>
