@@ -6,66 +6,43 @@
 
 <h1>Create Semester</h1>
 
-<hr />
+<p>
+    Add a semester to your student account.
+</p>
 
-<div class="row">
-    <div class="col-md-6">
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-        <form asp-action="Create">
-
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-
-            <div class="mb-3">
-                <label asp-for="SemesterName" class="form-label"></label>
-                <input asp-for="SemesterName" class="form-control" />
-                <span asp-validation-for="SemesterName" class="text-danger"></span>
-            </div>
-
-
-            <div class="mb-3">
-                <label asp-for="StartDate" class="form-label"></label>
-                <input asp-for="StartDate" class="form-control" type="date" />
-                <span asp-validation-for="StartDate" class="text-danger"></span>
-            </div>
-
-
-            <div class="mb-3">
-                <label asp-for="EndDate" class="form-label"></label>
-                <input asp-for="EndDate" class="form-control" type="date" />
-                <span asp-validation-for="EndDate" class="text-danger"></span>
-            </div>
-
-
-            <div class="mb-3">
-                <label asp-for="StudentId" class="form-label">
-                    Student
-                </label>
-
-                <select asp-for="StudentId"
-                        class="form-control"
-                        asp-items="ViewBag.StudentId">
-                    <option value="">-- Select Student --</option>
-                </select>
-
-                <span asp-validation-for="StudentId"
-                      class="text-danger"></span>
-            </div>
-
-
-            <button type="submit" class="btn btn-success">
-                Create
-            </button>
-
-            <a asp-action="Index" class="btn btn-secondary">
-                Back
-            </a>
-
-        </form>
-
+    <div class="mb-3">
+        <label asp-for="SemesterName" class="form-label"></label>
+        <input asp-for="SemesterName" class="form-control" />
+        <span asp-validation-for="SemesterName" class="text-danger"></span>
     </div>
-</div>
 
+    <div class="mb-3">
+        <label asp-for="StartDate" class="form-label"></label>
+        <input asp-for="StartDate"
+               type="date"
+               class="form-control" />
+        <span asp-validation-for="StartDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EndDate" class="form-label"></label>
+        <input asp-for="EndDate"
+               type="date"
+               class="form-control" />
+        <span asp-validation-for="EndDate" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Create Semester
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Back to Semesters
+    </a>
+</form>
 
 @section Scripts {
     @{

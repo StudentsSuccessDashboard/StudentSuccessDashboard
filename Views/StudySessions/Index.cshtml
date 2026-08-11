@@ -1,0 +1,70 @@
+﻿@model IEnumerable<StudentSuccessDashboard.Models.StudySession>
+
+@{
+    ViewData["Title"] = "Study Sessions";
+}
+
+<h1>Study Sessions</h1>
+
+<p>
+    Track your study activity and review previous study sessions.
+</p>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">
+        Add Study Session
+    </a>
+
+    <a asp-action="Timer" class="btn btn-primary">
+        Start Study Timer
+    </a>
+</p>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No study sessions have been recorded yet.
+    </div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Course</th>
+                <th>Topic</th>
+                <th>Duration</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var session in Model)
+            {
+                <tr>
+                    <td>@session.SessionDate.ToShortDateString()</td>
+                    <td>@session.Course.CourseName</td>
+                    <td>@session.Topic</td>
+                    <td>@session.DurationMinutes minutes</td>
+                    <td>@session.Notes</td>
+
+                    <td>
+                        <a asp-action="Edit"
+                           asp-route-id="@session.StudySessionId"
+                           class="btn btn-sm btn-primary">
+                            Edit
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@session.StudySessionId"
+                           class="btn btn-sm btn-danger">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

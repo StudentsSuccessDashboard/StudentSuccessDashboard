@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using StudentSuccessDashboard.Data;
 
 namespace StudentSuccessDashboard.Models
 {
@@ -19,16 +20,18 @@ namespace StudentSuccessDashboard.Models
         public string Email { get; set; } = "";
 
         [StringLength(100)]
-        public string Major { get; set; } = "";
+        public string? Major { get; set; }
 
         [Range(2000, 2100)]
-        public int GraduationYear { get; set; }
+        public int? GraduationYear { get; set; }
 
-        // Navigation Property
+        public string? UserId { get; set; }
+
+        public ApplicationUser? User { get; set; }
+
         public ICollection<Semester> Semesters { get; set; }
             = new List<Semester>();
 
-        // Navigation Property
         public ICollection<Course> Courses { get; set; }
             = new List<Course>();
     }
