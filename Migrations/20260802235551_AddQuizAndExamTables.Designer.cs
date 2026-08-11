@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudentSuccessDashboard.Data;
@@ -11,9 +12,11 @@ using StudentSuccessDashboard.Data;
 namespace StudentSuccessDashboard.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260802235551_AddQuizAndExamTables")]
+    partial class AddQuizAndExamTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -242,10 +245,6 @@ namespace StudentSuccessDashboard.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -253,14 +252,7 @@ namespace StudentSuccessDashboard.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("PointsPossible")
-                        .HasColumnType("double precision");
-
                     b.Property<string>("Priority")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -481,26 +473,19 @@ namespace StudentSuccessDashboard.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("SessionDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Topic")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("StudySessionId");
 
                     b.HasIndex("CourseId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("StudySessions");
                 });
@@ -633,25 +618,12 @@ namespace StudentSuccessDashboard.Migrations
             modelBuilder.Entity("StudentSuccessDashboard.Models.StudySession", b =>
                 {
                     b.HasOne("StudentSuccessDashboard.Models.Course", "Course")
-                        .WithMany("StudySessions")
+                        .WithMany()
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StudentSuccessDashboard.Data.ApplicationUser", "User")
-                        .WithMany("StudySessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Course");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("StudentSuccessDashboard.Data.ApplicationUser", b =>
-                {
-                    b.Navigation("StudySessions");
                 });
 
             modelBuilder.Entity("StudentSuccessDashboard.Models.Course", b =>
@@ -663,8 +635,6 @@ namespace StudentSuccessDashboard.Migrations
                     b.Navigation("Grades");
 
                     b.Navigation("Quizzes");
-
-                    b.Navigation("StudySessions");
                 });
 
             modelBuilder.Entity("StudentSuccessDashboard.Models.Semester", b =>
