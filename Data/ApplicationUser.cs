@@ -9,6 +9,8 @@ namespace StudentSuccessDashboard.Data
 
         public string? LastName { get; set; }
 
+        public Student? Student { get; set; }
+
         public ICollection<StudySession> StudySessions { get; set; }
             = new List<StudySession>();
     }

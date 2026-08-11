@@ -1,0 +1,70 @@
+﻿@model StudentSuccessDashboard.Models.StudySession
+
+@{
+    ViewData["Title"] = "Add Study Session";
+}
+
+<h1>Add Study Session</h1>
+
+<p>
+    Record a study session and connect it to one of your courses.
+</p>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="CourseId" class="form-label">Course</label>
+        <select asp-for="CourseId"
+                class="form-select"
+                asp-items="ViewBag.CourseId">
+            <option value="">Select a course</option>
+        </select>
+        <span asp-validation-for="CourseId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Topic" class="form-label"></label>
+        <input asp-for="Topic" class="form-control" />
+        <span asp-validation-for="Topic" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="SessionDate" class="form-label">Session Date</label>
+        <input asp-for="SessionDate"
+               type="datetime-local"
+               class="form-control" />
+        <span asp-validation-for="SessionDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DurationMinutes" class="form-label">Duration (Minutes)</label>
+        <input asp-for="DurationMinutes"
+               class="form-control"
+               min="1"
+               max="1440" />
+        <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes"
+                  class="form-control"
+                  rows="4"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Save Study Session
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Back to Study Sessions
+    </a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

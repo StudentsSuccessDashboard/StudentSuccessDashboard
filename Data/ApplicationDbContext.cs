@@ -32,6 +32,16 @@ namespace StudentSuccessDashboard.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Student>()
+                .HasOne(s => s.User)
+                .WithOne(u => u.Student)
+                .HasForeignKey<Student>(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Student>()
+                .HasIndex(s => s.UserId)
+                .IsUnique();
+
             modelBuilder.Entity<Semester>()
                 .HasOne(s => s.Student)
                 .WithMany(s => s.Semesters)
