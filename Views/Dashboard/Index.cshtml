@@ -57,3 +57,41 @@
     </div>
 
 </div>
+
+<div class="row mt-4">
+
+    <div class="col-md-3">
+        <h3>Quizzes</h3>
+        <p>Track quizzes and upcoming quiz deadlines.</p>
+
+        <a asp-controller="Quizzes"
+           asp-action="Index"
+           class="btn btn-primary">
+            View Quizzes
+        </a>
+
+        <a asp-controller="Quizzes"
+           asp-action="Create"
+           class="btn btn-success mt-2">
+            Add Quiz
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <h3>Exams</h3>
+        <p>Track exams and upcoming exam dates.</p>
+
+        <a asp-controller="Exams"
+           asp-action="Index"
+           class="btn btn-primary">
+            View Exams
+        </a>
+
+        <a asp-controller="Exams"
+           asp-action="Create"
+           class="btn btn-success mt-2">
+            Add Exam
+        </a>
+    </div>
+
+</div>
