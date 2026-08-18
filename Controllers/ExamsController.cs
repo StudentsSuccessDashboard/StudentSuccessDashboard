@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -17,36 +18,91 @@ namespace StudentSuccessDashboard.Controllers
             _context = context;
         }
 
+        private async Task<Student?> GetCurrentStudentAsync()
+        {
+            var userId = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
+
+            if (userId == null)
+            {
+                return null;
+            }
+
+            return await _context.Students
+                .FirstOrDefaultAsync(s => s.UserId == userId);
+        }
+
         // GET: Exams
         public async Task<IActionResult> Index()
         {
-            var exams = _context.Exams
-                .Include(e => e.Course);
+            var student = await GetCurrentStudentAsync();
 
-            return View(await exams.ToListAsync());
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var exams = await _context.Exams
+                .Include(e => e.Course)
+                .Where(e =>
+                    e.Course.StudentId == student.StudentId)
+                .OrderBy(e => e.ExamDate)
+                .ToListAsync();
+
+            return View(exams);
         }
 
         // GET: Exams/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
+            {
                 return NotFound();
+            }
+
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
 
             var exam = await _context.Exams
                 .Include(e => e.Course)
-                .FirstOrDefaultAsync(e => e.ExamId == id);
+                .FirstOrDefaultAsync(e =>
+                    e.ExamId == id &&
+                    e.Course.StudentId == student.StudentId);
 
             if (exam == null)
+            {
                 return NotFound();
+            }
 
             return View(exam);
         }
 
         // GET: Exams/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["CourseId"] =
-                new SelectList(_context.Courses, "CourseId", "CourseName");
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName"
+            );
 
             return View();
         }
@@ -56,15 +112,53 @@ namespace StudentSuccessDashboard.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Exam exam)
         {
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var courseBelongsToStudent =
+                await _context.Courses.AnyAsync(c =>
+                    c.CourseId == exam.CourseId &&
+                    c.StudentId == student.StudentId);
+
+            if (!courseBelongsToStudent)
+            {
+                ModelState.AddModelError(
+                    nameof(Exam.CourseId),
+                    "Please select one of your courses."
+                );
+            }
+
+            exam.ExamDate = DateTime.SpecifyKind(
+                exam.ExamDate,
+                DateTimeKind.Utc
+            );
+
+            ModelState.Remove(nameof(Exam.Course));
+
             if (ModelState.IsValid)
             {
-                _context.Add(exam);
+                _context.Exams.Add(exam);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CourseId"] =
-                new SelectList(_context.Courses, "CourseId", "CourseName", exam.CourseId);
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName",
+                exam.CourseId
+            );
 
             return View(exam);
         }
@@ -73,15 +167,40 @@ namespace StudentSuccessDashboard.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
+            {
                 return NotFound();
+            }
 
-            var exam = await _context.Exams.FindAsync(id);
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var exam = await _context.Exams
+                .Include(e => e.Course)
+                .FirstOrDefaultAsync(e =>
+                    e.ExamId == id &&
+                    e.Course.StudentId == student.StudentId);
 
             if (exam == null)
+            {
                 return NotFound();
+            }
 
-            ViewData["CourseId"] =
-                new SelectList(_context.Courses, "CourseId", "CourseName", exam.CourseId);
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName",
+                exam.CourseId
+            );
 
             return View(exam);
         }
@@ -89,31 +208,82 @@ namespace StudentSuccessDashboard.Controllers
         // POST: Exams/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Exam exam)
+        public async Task<IActionResult> Edit(
+            int id,
+            Exam exam)
         {
             if (id != exam.ExamId)
+            {
                 return NotFound();
+            }
+
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var existingExam = await _context.Exams
+                .Include(e => e.Course)
+                .FirstOrDefaultAsync(e =>
+                    e.ExamId == id &&
+                    e.Course.StudentId == student.StudentId);
+
+            if (existingExam == null)
+            {
+                return NotFound();
+            }
+
+            var courseBelongsToStudent =
+                await _context.Courses.AnyAsync(c =>
+                    c.CourseId == exam.CourseId &&
+                    c.StudentId == student.StudentId);
+
+            if (!courseBelongsToStudent)
+            {
+                ModelState.AddModelError(
+                    nameof(Exam.CourseId),
+                    "Please select one of your courses."
+                );
+            }
+
+            ModelState.Remove(nameof(Exam.Course));
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(exam);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Exams.Any(e => e.ExamId == exam.ExamId))
-                        return NotFound();
+                existingExam.ExamName =
+                    exam.ExamName;
 
-                    throw;
-                }
+                existingExam.ExamDate =
+                    DateTime.SpecifyKind(
+                        exam.ExamDate,
+                        DateTimeKind.Utc
+                    );
+
+                existingExam.PointsPossible =
+                    exam.PointsPossible;
+
+                existingExam.CourseId =
+                    exam.CourseId;
+
+                await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CourseId"] =
-                new SelectList(_context.Courses, "CourseId", "CourseName", exam.CourseId);
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName",
+                exam.CourseId
+            );
 
             return View(exam);
         }
@@ -122,14 +292,27 @@ namespace StudentSuccessDashboard.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
+            {
                 return NotFound();
+            }
+
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
 
             var exam = await _context.Exams
                 .Include(e => e.Course)
-                .FirstOrDefaultAsync(e => e.ExamId == id);
+                .FirstOrDefaultAsync(e =>
+                    e.ExamId == id &&
+                    e.Course.StudentId == student.StudentId);
 
             if (exam == null)
+            {
                 return NotFound();
+            }
 
             return View(exam);
         }
@@ -137,15 +320,29 @@ namespace StudentSuccessDashboard.Controllers
         // POST: Exams/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(
+            int id)
         {
-            var exam = await _context.Exams.FindAsync(id);
+            var student = await GetCurrentStudentAsync();
 
-            if (exam != null)
+            if (student == null)
             {
-                _context.Exams.Remove(exam);
-                await _context.SaveChangesAsync();
+                return Unauthorized();
             }
+
+            var exam = await _context.Exams
+                .Include(e => e.Course)
+                .FirstOrDefaultAsync(e =>
+                    e.ExamId == id &&
+                    e.Course.StudentId == student.StudentId);
+
+            if (exam == null)
+            {
+                return NotFound();
+            }
+
+            _context.Exams.Remove(exam);
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }

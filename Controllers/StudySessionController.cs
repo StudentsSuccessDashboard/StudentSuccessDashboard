@@ -49,9 +49,11 @@ namespace StudentSuccessDashboard.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(StudySession studySession)
+        public async Task<IActionResult> Create(
+            StudySession studySession)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null)
             {
@@ -59,6 +61,11 @@ namespace StudentSuccessDashboard.Controllers
             }
 
             studySession.UserId = userId;
+
+            studySession.SessionDate = DateTime.SpecifyKind(
+                studySession.SessionDate,
+                DateTimeKind.Utc
+            );
 
             ModelState.Remove(nameof(StudySession.UserId));
             ModelState.Remove(nameof(StudySession.User));
@@ -89,17 +96,19 @@ namespace StudentSuccessDashboard.Controllers
                 return NotFound();
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var studySession = await _context.StudySessions
-                .FirstOrDefaultAsync(s =>
-                    s.StudySessionId == id &&
-                    s.UserId == userId);
+            var studySession =
+                await _context.StudySessions
+                    .FirstOrDefaultAsync(s =>
+                        s.StudySessionId == id &&
+                        s.UserId == userId);
 
             if (studySession == null)
             {
@@ -127,17 +136,19 @@ namespace StudentSuccessDashboard.Controllers
                 return NotFound();
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var existingSession = await _context.StudySessions
-                .FirstOrDefaultAsync(s =>
-                    s.StudySessionId == id &&
-                    s.UserId == userId);
+            var existingSession =
+                await _context.StudySessions
+                    .FirstOrDefaultAsync(s =>
+                        s.StudySessionId == id &&
+                        s.UserId == userId);
 
             if (existingSession == null)
             {
@@ -150,11 +161,23 @@ namespace StudentSuccessDashboard.Controllers
 
             if (ModelState.IsValid)
             {
-                existingSession.CourseId = studySession.CourseId;
-                existingSession.Topic = studySession.Topic;
-                existingSession.SessionDate = studySession.SessionDate;
-                existingSession.DurationMinutes = studySession.DurationMinutes;
-                existingSession.Notes = studySession.Notes;
+                existingSession.CourseId =
+                    studySession.CourseId;
+
+                existingSession.Topic =
+                    studySession.Topic;
+
+                existingSession.SessionDate =
+                    DateTime.SpecifyKind(
+                        studySession.SessionDate,
+                        DateTimeKind.Utc
+                    );
+
+                existingSession.DurationMinutes =
+                    studySession.DurationMinutes;
+
+                existingSession.Notes =
+                    studySession.Notes;
 
                 await _context.SaveChangesAsync();
 
@@ -178,18 +201,20 @@ namespace StudentSuccessDashboard.Controllers
                 return NotFound();
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var studySession = await _context.StudySessions
-                .Include(s => s.Course)
-                .FirstOrDefaultAsync(s =>
-                    s.StudySessionId == id &&
-                    s.UserId == userId);
+            var studySession =
+                await _context.StudySessions
+                    .Include(s => s.Course)
+                    .FirstOrDefaultAsync(s =>
+                        s.StudySessionId == id &&
+                        s.UserId == userId);
 
             if (studySession == null)
             {
@@ -203,17 +228,19 @@ namespace StudentSuccessDashboard.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var studySession = await _context.StudySessions
-                .FirstOrDefaultAsync(s =>
-                    s.StudySessionId == id &&
-                    s.UserId == userId);
+            var studySession =
+                await _context.StudySessions
+                    .FirstOrDefaultAsync(s =>
+                        s.StudySessionId == id &&
+                        s.UserId == userId);
 
             if (studySession == null)
             {
@@ -245,7 +272,8 @@ namespace StudentSuccessDashboard.Controllers
             string? Notes,
             int DurationMinutes)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null)
             {
@@ -265,7 +293,10 @@ namespace StudentSuccessDashboard.Controllers
                 Topic = Topic,
                 Notes = Notes,
                 DurationMinutes = DurationMinutes,
-                SessionDate = DateTime.Now,
+
+                // PostgreSQL requires UTC
+                SessionDate = DateTime.UtcNow,
+
                 UserId = userId
             };
 

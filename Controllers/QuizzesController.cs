@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -17,135 +18,323 @@ namespace StudentSuccessDashboard.Controllers
             _context = context;
         }
 
-        // GET: Quizzes
-        public async Task<IActionResult> Index()
+        private async Task<Student?> GetCurrentStudentAsync()
         {
-            var quizzes = _context.Quizzes
-                .Include(q => q.Course);
+            var userId = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
 
-            return View(await quizzes.ToListAsync());
+            if (userId == null)
+            {
+                return null;
+            }
+
+            return await _context.Students
+                .FirstOrDefaultAsync(s => s.UserId == userId);
         }
 
-        // GET: Quizzes/Details/5
+        public async Task<IActionResult> Index()
+        {
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var quizzes = await _context.Quizzes
+                .Include(q => q.Course)
+                .Where(q =>
+                    q.Course.StudentId == student.StudentId)
+                .OrderBy(q => q.DueDate)
+                .ToListAsync();
+
+            return View(quizzes);
+        }
+
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
+            {
                 return NotFound();
+            }
+
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
 
             var quiz = await _context.Quizzes
                 .Include(q => q.Course)
-                .FirstOrDefaultAsync(q => q.QuizId == id);
+                .FirstOrDefaultAsync(q =>
+                    q.QuizId == id &&
+                    q.Course.StudentId == student.StudentId);
 
             if (quiz == null)
+            {
                 return NotFound();
+            }
 
             return View(quiz);
         }
 
-        // GET: Quizzes/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["CourseId"] =
-                new SelectList(_context.Courses, "CourseId", "CourseName");
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName"
+            );
 
             return View();
         }
 
-        // POST: Quizzes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Quiz quiz)
         {
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var courseBelongsToStudent =
+                await _context.Courses.AnyAsync(c =>
+                    c.CourseId == quiz.CourseId &&
+                    c.StudentId == student.StudentId);
+
+            if (!courseBelongsToStudent)
+            {
+                ModelState.AddModelError(
+                    nameof(Quiz.CourseId),
+                    "Please select one of your courses."
+                );
+            }
+
+            quiz.DueDate = DateTime.SpecifyKind(
+                quiz.DueDate,
+                DateTimeKind.Utc
+            );
+
+            ModelState.Remove(nameof(Quiz.Course));
+
             if (ModelState.IsValid)
             {
-                _context.Add(quiz);
+                _context.Quizzes.Add(quiz);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CourseId"] =
-                new SelectList(_context.Courses, "CourseId", "CourseName", quiz.CourseId);
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName",
+                quiz.CourseId
+            );
 
             return View(quiz);
         }
 
-        // GET: Quizzes/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
+            {
                 return NotFound();
+            }
 
-            var quiz = await _context.Quizzes.FindAsync(id);
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var quiz = await _context.Quizzes
+                .Include(q => q.Course)
+                .FirstOrDefaultAsync(q =>
+                    q.QuizId == id &&
+                    q.Course.StudentId == student.StudentId);
 
             if (quiz == null)
+            {
                 return NotFound();
+            }
 
-            ViewData["CourseId"] =
-                new SelectList(_context.Courses, "CourseId", "CourseName", quiz.CourseId);
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName",
+                quiz.CourseId
+            );
 
             return View(quiz);
         }
 
-        // POST: Quizzes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Quiz quiz)
+        public async Task<IActionResult> Edit(
+            int id,
+            Quiz quiz)
         {
             if (id != quiz.QuizId)
+            {
                 return NotFound();
+            }
+
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var existingQuiz = await _context.Quizzes
+                .Include(q => q.Course)
+                .FirstOrDefaultAsync(q =>
+                    q.QuizId == id &&
+                    q.Course.StudentId == student.StudentId);
+
+            if (existingQuiz == null)
+            {
+                return NotFound();
+            }
+
+            var courseBelongsToStudent =
+                await _context.Courses.AnyAsync(c =>
+                    c.CourseId == quiz.CourseId &&
+                    c.StudentId == student.StudentId);
+
+            if (!courseBelongsToStudent)
+            {
+                ModelState.AddModelError(
+                    nameof(Quiz.CourseId),
+                    "Please select one of your courses."
+                );
+            }
+
+            ModelState.Remove(nameof(Quiz.Course));
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(quiz);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Quizzes.Any(e => e.QuizId == quiz.QuizId))
-                        return NotFound();
+                existingQuiz.QuizName =
+                    quiz.QuizName;
 
-                    throw;
-                }
+                existingQuiz.DueDate =
+                    DateTime.SpecifyKind(
+                        quiz.DueDate,
+                        DateTimeKind.Utc
+                    );
+
+                existingQuiz.PointsPossible =
+                    quiz.PointsPossible;
+
+                existingQuiz.CourseId =
+                    quiz.CourseId;
+
+                await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CourseId"] =
-                new SelectList(_context.Courses, "CourseId", "CourseName", quiz.CourseId);
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName",
+                quiz.CourseId
+            );
 
             return View(quiz);
         }
 
-        // GET: Quizzes/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
+            {
                 return NotFound();
+            }
+
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
 
             var quiz = await _context.Quizzes
                 .Include(q => q.Course)
-                .FirstOrDefaultAsync(q => q.QuizId == id);
+                .FirstOrDefaultAsync(q =>
+                    q.QuizId == id &&
+                    q.Course.StudentId == student.StudentId);
 
             if (quiz == null)
+            {
                 return NotFound();
+            }
 
             return View(quiz);
         }
 
-        // POST: Quizzes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(
+            int id)
         {
-            var quiz = await _context.Quizzes.FindAsync(id);
+            var student = await GetCurrentStudentAsync();
 
-            if (quiz != null)
+            if (student == null)
             {
-                _context.Quizzes.Remove(quiz);
-                await _context.SaveChangesAsync();
+                return Unauthorized();
             }
+
+            var quiz = await _context.Quizzes
+                .Include(q => q.Course)
+                .FirstOrDefaultAsync(q =>
+                    q.QuizId == id &&
+                    q.Course.StudentId == student.StudentId);
+
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+
+            _context.Quizzes.Remove(quiz);
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
