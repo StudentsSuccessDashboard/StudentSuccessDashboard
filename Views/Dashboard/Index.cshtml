@@ -1,97 +1,313 @@
-﻿@{
+﻿@using StudentSuccessDashboard.Models
+
+@{
     ViewData["Title"] = "Dashboard";
+
+    var upcomingAssignments =
+        ViewBag.UpcomingAssignments as List<Assignment>
+        ?? new List<Assignment>();
+
+    var upcomingQuizzes =
+        ViewBag.UpcomingQuizzes as List<Quiz>
+        ?? new List<Quiz>();
+
+    var upcomingExams =
+        ViewBag.UpcomingExams as List<Exam>
+        ?? new List<Exam>();
 }
 
-<h1>Student Success Dashboard</h1>
+<h1 class="mb-2">Student Success Dashboard</h1>
 
-<p>
+<p class="mb-4">
     Welcome to your academic productivity dashboard.
 </p>
 
-<div class="row">
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h3 class="card-title">Upcoming Deadlines</h3>
 
-    <div class="col-md-3">
-        <h3>Courses</h3>
-        <p>Manage enrolled courses.</p>
+        @if (!upcomingAssignments.Any()
+                && !upcomingQuizzes.Any()
+                && !upcomingExams.Any())
+        {
+            <p class="text-muted mb-0">
+                No upcoming deadlines found.
+            </p>
+        }
+        else
+        {
+            <div class="row g-4">
 
-        <a asp-controller="Courses"
-           asp-action="Index"
-           class="btn btn-primary">
-            View Courses
-        </a>
+                <div class="col-md-4">
+                    <h5>Assignments</h5>
 
-        <a asp-controller="Courses"
-           asp-action="Create"
-           class="btn btn-success mt-2">
-            Add Course
-        </a>
+                    @if (!upcomingAssignments.Any())
+                    {
+                        <p class="text-muted">
+                            No upcoming assignments.
+                        </p>
+                    }
+                    else
+                    {
+                        <ul class="list-group">
+                            @foreach (var assignment in upcomingAssignments)
+                            {
+                                <li class="list-group-item">
+                                    <strong>
+                                        @assignment.Title
+                                    </strong>
+                                    <br />
+
+                                    <small>
+                                        @assignment.Course.CourseName
+                                    </small>
+                                    <br />
+
+                                    <small>
+                                        Due:
+                                        @assignment.DueDate.ToString("MMM d, yyyy")
+                                    </small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+
+                <div class="col-md-4">
+                    <h5>Quizzes</h5>
+
+                    @if (!upcomingQuizzes.Any())
+                    {
+                        <p class="text-muted">
+                            No upcoming quizzes.
+                        </p>
+                    }
+                    else
+                    {
+                        <ul class="list-group">
+                            @foreach (var quiz in upcomingQuizzes)
+                            {
+                                <li class="list-group-item">
+                                    <strong>
+                                        @quiz.QuizName
+                                    </strong>
+                                    <br />
+
+                                    <small>
+                                        @quiz.Course.CourseName
+                                    </small>
+                                    <br />
+
+                                    <small>
+                                        Due:
+                                        @quiz.DueDate.ToString("MMM d, yyyy")
+                                    </small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+
+                <div class="col-md-4">
+                    <h5>Exams</h5>
+
+                    @if (!upcomingExams.Any())
+                    {
+                        <p class="text-muted">
+                            No upcoming exams.
+                        </p>
+                    }
+                    else
+                    {
+                        <ul class="list-group">
+                            @foreach (var exam in upcomingExams)
+                            {
+                                <li class="list-group-item">
+                                    <strong>
+                                        @exam.ExamName
+                                    </strong>
+                                    <br />
+
+                                    <small>
+                                        @exam.Course.CourseName
+                                    </small>
+                                    <br />
+
+                                    <small>
+                                        Date:
+                                        @exam.ExamDate.ToString("MMM d, yyyy")
+                                    </small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+
+            </div>
+        }
     </div>
-
-    <div class="col-md-3">
-        <h3>Assignments</h3>
-        <p>Track upcoming deadlines.</p>
-
-        <a href="#" class="btn btn-primary">
-            View Assignments
-        </a>
-    </div>
-
-    <div class="col-md-3">
-        <h3>Study Sessions</h3>
-        <p>Record study activity.</p>
-
-        <a asp-controller="StudySessions"
-           asp-action="Index"
-           class="btn btn-primary">
-            View Study Sessions
-        </a>
-    </div>
-
-    <div class="col-md-3">
-        <h3>Grades</h3>
-        <p>Monitor academic progress.</p>
-
-        <a href="#" class="btn btn-primary">
-            View Grades
-        </a>
-    </div>
-
 </div>
 
-<div class="row mt-4">
+<div class="row g-4">
 
-    <div class="col-md-3">
-        <h3>Quizzes</h3>
-        <p>Track quizzes and upcoming quiz deadlines.</p>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title">Courses</h3>
 
-        <a asp-controller="Quizzes"
-           asp-action="Index"
-           class="btn btn-primary">
-            View Quizzes
-        </a>
+                <p class="card-text">
+                    Manage enrolled courses and academic information.
+                </p>
 
-        <a asp-controller="Quizzes"
-           asp-action="Create"
-           class="btn btn-success mt-2">
-            Add Quiz
-        </a>
+                <a asp-controller="Courses"
+                   asp-action="Index"
+                   class="btn btn-primary">
+                    View Courses
+                </a>
+
+                <a asp-controller="Courses"
+                   asp-action="Create"
+                   class="btn btn-success">
+                    Add Course
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-3">
-        <h3>Exams</h3>
-        <p>Track exams and upcoming exam dates.</p>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title">Assignments</h3>
 
-        <a asp-controller="Exams"
-           asp-action="Index"
-           class="btn btn-primary">
-            View Exams
-        </a>
+                <p class="card-text">
+                    Track assignments, deadlines,
+                    priorities, and progress.
+                </p>
 
-        <a asp-controller="Exams"
-           asp-action="Create"
-           class="btn btn-success mt-2">
-            Add Exam
-        </a>
+                <a asp-controller="Assignments"
+                   asp-action="Index"
+                   class="btn btn-primary">
+                    View Assignments
+                </a>
+
+                <a asp-controller="Assignments"
+                   asp-action="Create"
+                   class="btn btn-success">
+                    Add Assignment
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title">Quizzes</h3>
+
+                <p class="card-text">
+                    Track quizzes and upcoming quiz deadlines.
+                </p>
+
+                <a asp-controller="Quizzes"
+                   asp-action="Index"
+                   class="btn btn-primary">
+                    View Quizzes
+                </a>
+
+                <a asp-controller="Quizzes"
+                   asp-action="Create"
+                   class="btn btn-success">
+                    Add Quiz
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title">Exams</h3>
+
+                <p class="card-text">
+                    Track exams and upcoming exam dates.
+                </p>
+
+                <a asp-controller="Exams"
+                   asp-action="Index"
+                   class="btn btn-primary">
+                    View Exams
+                </a>
+
+                <a asp-controller="Exams"
+                   asp-action="Create"
+                   class="btn btn-success">
+                    Add Exam
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title">Study Sessions</h3>
+
+                <p class="card-text">
+                    Record study activity and
+                    track focused study time.
+                </p>
+
+                <a asp-controller="StudySessions"
+                   asp-action="Index"
+                   class="btn btn-primary">
+                    View Study Sessions
+                </a>
+
+                <a asp-controller="StudySessions"
+                   asp-action="Timer"
+                   class="btn btn-success">
+                    Study Timer
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title">
+                    Academic Calendar
+                </h3>
+
+                <p class="card-text">
+                    View important academic dates
+                    in a monthly calendar.
+                </p>
+
+                <a asp-controller="Calendar"
+                   asp-action="Index"
+                   class="btn btn-primary">
+                    View Calendar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title">Grades</h3>
+
+                <p class="card-text">
+                    Monitor grades and academic progress.
+                </p>
+
+                <button class="btn btn-secondary"
+                        disabled>
+                    Grades Coming Soon
+                </button>
+            </div>
+        </div>
     </div>
 
 </div>
