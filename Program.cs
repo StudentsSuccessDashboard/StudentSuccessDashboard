@@ -1,12 +1,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StudentSuccessDashboard.Data;
+using StudentSuccessDashboard.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+// Register Grade Calculation Service
+builder.Services.AddScoped<GradeCalculationService>();
 
 // Database Connection
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

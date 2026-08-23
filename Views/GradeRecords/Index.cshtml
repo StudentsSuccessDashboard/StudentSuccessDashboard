@@ -1,0 +1,139 @@
+﻿@model IEnumerable<StudentSuccessDashboard.Models.GradeRecord>
+
+@{
+    ViewData["Title"] = "Grades";
+
+    var courseAverages =
+        ViewBag.CourseAverages as Dictionary<int, double>
+        ?? new Dictionary<int, double>();
+}
+
+<h1>Grades</h1>
+
+@if (ViewBag.CumulativeGpa != null)
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h3 class="card-title">Cumulative GPA</h3>
+
+            <p class="display-6 mb-0">
+                @(((double)ViewBag.CumulativeGpa).ToString("0.00"))
+            </p>
+
+            <small class="text-muted">
+                Based on current course averages and course credits.
+            </small>
+        </div>
+    </div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-success">
+        Add Grade
+    </a>
+</p>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No grades have been entered yet.
+    </div>
+}
+else
+{
+    <h3 class="mt-4">Current Course Averages</h3>
+
+    <div class="row g-3 mb-4">
+        @foreach (var course in Model
+            .Where(g => g.Course != null)
+            .Select(g => g.Course)
+            .DistinctBy(c => c.CourseId))
+        {
+            var average = courseAverages.ContainsKey(course.CourseId)
+                ? courseAverages[course.CourseId]
+                : 0;
+
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            @course.CourseName
+                        </h5>
+
+                        <p class="card-text">
+                            Current Average:
+                            <strong>
+                                @average.ToString("0.00")%
+                            </strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <h3>Grade Records</h3>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    Category
+                </th>
+                <th>
+                    Score
+                </th>
+                <th>
+                    Weight
+                </th>
+                <th>
+                    Course
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @item.Category
+                    </td>
+
+                    <td>
+                        @item.Score.ToString("0.##")%
+                    </td>
+
+                    <td>
+                        @item.Weight.ToString("0.##")%
+                    </td>
+
+                    <td>
+                        @item.Course?.CourseName
+                    </td>
+
+                    <td>
+                        <a asp-action="Edit"
+                           asp-route-id="@item.GradeRecordId"
+                           class="btn btn-sm btn-primary">
+                            Edit
+                        </a>
+
+                        <a asp-action="Details"
+                           asp-route-id="@item.GradeRecordId"
+                           class="btn btn-sm btn-info">
+                            Details
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@item.GradeRecordId"
+                           class="btn btn-sm btn-danger">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

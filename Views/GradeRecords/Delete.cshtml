@@ -1,0 +1,55 @@
+﻿@model StudentSuccessDashboard.Models.GradeRecord
+
+@{
+    ViewData["Title"] = "Delete Grade";
+}
+
+<h1>Delete Grade</h1>
+
+<h3>Are you sure you want to delete this grade?</h3>
+
+<hr />
+
+<dl class="row">
+    <dt class="col-sm-3">
+        Category
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Category
+    </dd>
+
+    <dt class="col-sm-3">
+        Score
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Score.ToString("0.##")%
+    </dd>
+
+    <dt class="col-sm-3">
+        Weight
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Weight.ToString("0.##")%
+    </dd>
+
+    <dt class="col-sm-3">
+        Course
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Course?.CourseName
+    </dd>
+</dl>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden"
+           asp-for="GradeRecordId" />
+
+    <input type="submit"
+           value="Delete"
+           class="btn btn-danger" />
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Cancel
+    </a>
+</form>
