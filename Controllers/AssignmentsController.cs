@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +8,7 @@ using StudentSuccessDashboard.Models;
 
 namespace StudentSuccessDashboard.Controllers
 {
+    [Authorize]
     public class AssignmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -15,97 +18,318 @@ namespace StudentSuccessDashboard.Controllers
             _context = context;
         }
 
-        // GET: Assignments (Index)
+        private async Task<Student?> GetCurrentStudentAsync()
+        {
+            var userId = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
+
+            if (userId == null)
+            {
+                return null;
+            }
+
+            return await _context.Students
+                .FirstOrDefaultAsync(s => s.UserId == userId);
+        }
+
+        // GET: Assignments
         public async Task<IActionResult> Index()
         {
-            var assignments = _context.Assignments.Include(a => a.Course);
-            return View(await assignments.ToListAsync());
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var assignments = await _context.Assignments
+                .Include(a => a.Course)
+                .Where(a =>
+                    a.Course.StudentId == student.StudentId)
+                .OrderBy(a => a.DueDate)
+                .ToListAsync();
+
+            return View(assignments);
         }
 
         // GET: Assignments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
 
             var assignment = await _context.Assignments
                 .Include(a => a.Course)
-                .FirstOrDefaultAsync(m => m.AssignmentId == id);
+                .FirstOrDefaultAsync(a =>
+                    a.AssignmentId == id &&
+                    a.Course.StudentId == student.StudentId);
 
-            if (assignment == null) return NotFound();
+            if (assignment == null)
+            {
+                return NotFound();
+            }
 
             return View(assignment);
         }
 
         // GET: Assignments/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "CourseName");
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName"
+            );
+
             return View();
         }
 
         // POST: Assignments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AssignmentId,Title,Description,DueDate,Priority,Status,PointsPossible,CourseId")] Assignment assignment)
+        public async Task<IActionResult> Create(
+            Assignment assignment)
         {
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var courseBelongsToStudent =
+                await _context.Courses.AnyAsync(c =>
+                    c.CourseId == assignment.CourseId &&
+                    c.StudentId == student.StudentId);
+
+            if (!courseBelongsToStudent)
+            {
+                ModelState.AddModelError(
+                    nameof(Assignment.CourseId),
+                    "Please select one of your courses."
+                );
+            }
+
+            assignment.DueDate = DateTime.SpecifyKind(
+                assignment.DueDate,
+                DateTimeKind.Utc
+            );
+
+            ModelState.Remove(nameof(Assignment.Course));
+
             if (ModelState.IsValid)
             {
-                _context.Add(assignment);
+                _context.Assignments.Add(assignment);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "CourseName", assignment.CourseId);
+
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName",
+                assignment.CourseId
+            );
+
             return View(assignment);
         }
 
         // GET: Assignments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-            var assignment = await _context.Assignments.FindAsync(id);
-            if (assignment == null) return NotFound();
+            var student = await GetCurrentStudentAsync();
 
-            ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "CourseName", assignment.CourseId);
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var assignment = await _context.Assignments
+                .Include(a => a.Course)
+                .FirstOrDefaultAsync(a =>
+                    a.AssignmentId == id &&
+                    a.Course.StudentId == student.StudentId);
+
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName",
+                assignment.CourseId
+            );
+
             return View(assignment);
         }
 
         // POST: Assignments/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("AssignmentId,Title,Description,DueDate,Priority,Status,PointsPossible,CourseId")] Assignment assignment)
+        public async Task<IActionResult> Edit(
+            int id,
+            Assignment assignment)
         {
-            if (id != assignment.AssignmentId) return NotFound();
+            if (id != assignment.AssignmentId)
+            {
+                return NotFound();
+            }
+
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
+
+            var existingAssignment =
+                await _context.Assignments
+                    .Include(a => a.Course)
+                    .FirstOrDefaultAsync(a =>
+                        a.AssignmentId == id &&
+                        a.Course.StudentId == student.StudentId);
+
+            if (existingAssignment == null)
+            {
+                return NotFound();
+            }
+
+            var courseBelongsToStudent =
+                await _context.Courses.AnyAsync(c =>
+                    c.CourseId == assignment.CourseId &&
+                    c.StudentId == student.StudentId);
+
+            if (!courseBelongsToStudent)
+            {
+                ModelState.AddModelError(
+                    nameof(Assignment.CourseId),
+                    "Please select one of your courses."
+                );
+            }
+
+            ModelState.Remove(nameof(Assignment.Course));
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(assignment);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Assignments.Any(e => e.AssignmentId == assignment.AssignmentId))
-                        return NotFound();
-                    else throw;
-                }
+                existingAssignment.Title =
+                    assignment.Title;
+
+                existingAssignment.Description =
+                    assignment.Description;
+
+                existingAssignment.DueDate =
+                    DateTime.SpecifyKind(
+                        assignment.DueDate,
+                        DateTimeKind.Utc
+                    );
+
+                existingAssignment.Priority =
+                    assignment.Priority;
+
+                existingAssignment.Status =
+                    assignment.Status;
+
+                existingAssignment.PointsPossible =
+                    assignment.PointsPossible;
+
+                existingAssignment.Completed =
+                    assignment.Completed;
+
+                existingAssignment.Notes =
+                    assignment.Notes;
+
+                existingAssignment.CourseId =
+                    assignment.CourseId;
+
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "CourseName", assignment.CourseId);
+
+            var courses = await _context.Courses
+                .Where(c =>
+                    c.StudentId == student.StudentId)
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+
+            ViewData["CourseId"] = new SelectList(
+                courses,
+                "CourseId",
+                "CourseName",
+                assignment.CourseId
+            );
+
             return View(assignment);
         }
 
         // GET: Assignments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return Unauthorized();
+            }
 
             var assignment = await _context.Assignments
                 .Include(a => a.Course)
-                .FirstOrDefaultAsync(m => m.AssignmentId == id);
+                .FirstOrDefaultAsync(a =>
+                    a.AssignmentId == id &&
+                    a.Course.StudentId == student.StudentId);
 
-            if (assignment == null) return NotFound();
+            if (assignment == null)
+            {
+                return NotFound();
+            }
 
             return View(assignment);
         }
@@ -113,14 +337,30 @@ namespace StudentSuccessDashboard.Controllers
         // POST: Assignments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(
+            int id)
         {
-            var assignment = await _context.Assignments.FindAsync(id);
-            if (assignment != null)
+            var student = await GetCurrentStudentAsync();
+
+            if (student == null)
             {
-                _context.Assignments.Remove(assignment);
-                await _context.SaveChangesAsync();
+                return Unauthorized();
             }
+
+            var assignment = await _context.Assignments
+                .Include(a => a.Course)
+                .FirstOrDefaultAsync(a =>
+                    a.AssignmentId == id &&
+                    a.Course.StudentId == student.StudentId);
+
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            _context.Assignments.Remove(assignment);
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
     }
