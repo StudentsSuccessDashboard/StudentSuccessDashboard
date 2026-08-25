@@ -1,0 +1,52 @@
+﻿@model StudentSuccessDashboard.Models.GradeRecord
+
+@{
+    ViewData["Title"] = "Grade Details";
+}
+
+<h1>Grade Details</h1>
+
+<hr />
+
+<dl class="row">
+    <dt class="col-sm-3">
+        Category
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Category
+    </dd>
+
+    <dt class="col-sm-3">
+        Score
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Score.ToString("0.##")%
+    </dd>
+
+    <dt class="col-sm-3">
+        Weight
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Weight.ToString("0.##")%
+    </dd>
+
+    <dt class="col-sm-3">
+        Course
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Course?.CourseName
+    </dd>
+</dl>
+
+<div>
+    <a asp-action="Edit"
+       asp-route-id="@Model.GradeRecordId"
+       class="btn btn-primary">
+        Edit
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back to Grades
+    </a>
+</div>

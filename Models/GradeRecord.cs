@@ -6,23 +6,21 @@ namespace StudentSuccessDashboard.Models
     {
         public int GradeRecordId { get; set; }
 
-
+        [Required]
+        [StringLength(50)]
+        [Display(Name = "Grade Category")]
         public string Category { get; set; } = "";
 
-
+        [Range(0, 100)]
         public double Score { get; set; }
 
-
+        [Range(0, 100)]
         public double Weight { get; set; }
-
-
 
         // Foreign Key
         public int CourseId { get; set; }
 
-
-
         // Navigation Property
-        public Course Course { get; set; } = null!;
+        public Course? Course { get; set; }
     }
 }
