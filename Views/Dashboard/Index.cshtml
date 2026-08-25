@@ -1,4 +1,5 @@
 ﻿@using StudentSuccessDashboard.Models
+@using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
     ViewData["Title"] = "Dashboard";
@@ -14,307 +15,825 @@
     var upcomingExams =
         ViewBag.UpcomingExams as List<Exam>
         ?? new List<Exam>();
+
+    var currentGrades =
+        ViewBag.CurrentGrades as IEnumerable<dynamic>
+        ?? new List<dynamic>();
+
+    var recentStudySessions =
+        ViewBag.RecentStudySessions as List<StudySession>
+        ?? new List<StudySession>();
+
+    var searchTerm =
+        ViewBag.SearchTerm as string ?? "";
+
+    var selectedPriority =
+        ViewBag.SelectedPriority as string ?? "";
+
+    var selectedCourseId =
+        ViewBag.SelectedCourseId as int?;
+
+    var courseSearchResults =
+        ViewBag.CourseSearchResults as IEnumerable<object>
+        ?? new List<object>();
+
+    var assignmentSearchResults =
+        ViewBag.AssignmentSearchResults as IEnumerable<object>
+        ?? new List<object>();
+
+    var quizSearchResults =
+        ViewBag.QuizSearchResults as IEnumerable<object>
+        ?? new List<object>();
+
+    var examSearchResults =
+        ViewBag.ExamSearchResults as IEnumerable<object>
+        ?? new List<object>();
+
+    var hasSearchResults =
+        courseSearchResults.Any()
+        || assignmentSearchResults.Any()
+        || quizSearchResults.Any()
+        || examSearchResults.Any();
+
+    var filtersActive =
+        selectedCourseId.HasValue
+        || !string.IsNullOrWhiteSpace(selectedPriority);
 }
 
-<h1 class="mb-2">Student Success Dashboard</h1>
+<div class="row align-items-center mb-4 g-3">
 
-<p class="mb-4">
-    Welcome to your academic productivity dashboard.
-</p>
+    <div class="col-lg-5">
+        <h1 class="mb-2">
+            Student Success Dashboard
+        </h1>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h3 class="card-title">Upcoming Deadlines</h3>
+        <p class="text-muted mb-0">
+            Welcome to your academic productivity dashboard.
+        </p>
+    </div>
 
-        @if (!upcomingAssignments.Any()
-                && !upcomingQuizzes.Any()
-                && !upcomingExams.Any())
-        {
-            <p class="text-muted mb-0">
-                No upcoming deadlines found.
-            </p>
-        }
-        else
-        {
-            <div class="row g-4">
+    <div class="col-lg-7">
 
-                <div class="col-md-4">
-                    <h5>Assignments</h5>
+        <form asp-controller="Dashboard"
+              asp-action="Index"
+              method="get">
 
-                    @if (!upcomingAssignments.Any())
-                    {
-                        <p class="text-muted">
-                            No upcoming assignments.
-                        </p>
-                    }
-                    else
-                    {
-                        <ul class="list-group">
-                            @foreach (var assignment in upcomingAssignments)
-                            {
-                                <li class="list-group-item">
-                                    <strong>
-                                        @assignment.Title
-                                    </strong>
-                                    <br />
+            <div class="row g-2">
 
-                                    <small>
-                                        @assignment.Course.CourseName
-                                    </small>
-                                    <br />
-
-                                    <small>
-                                        Due:
-                                        @assignment.DueDate.ToString("MMM d, yyyy")
-                                    </small>
-                                </li>
-                            }
-                        </ul>
-                    }
+                <div class="col-md-5">
+                    <input type="text"
+                           name="searchTerm"
+                           value="@searchTerm"
+                           class="form-control"
+                           placeholder="Search academic records..." />
                 </div>
 
-                <div class="col-md-4">
-                    <h5>Quizzes</h5>
+                <div class="col-md-3">
+                    <select name="courseId"
+                            asp-items="ViewBag.CourseFilter"
+                            class="form-select">
 
-                    @if (!upcomingQuizzes.Any())
-                    {
-                        <p class="text-muted">
-                            No upcoming quizzes.
-                        </p>
-                    }
-                    else
-                    {
-                        <ul class="list-group">
-                            @foreach (var quiz in upcomingQuizzes)
-                            {
-                                <li class="list-group-item">
-                                    <strong>
-                                        @quiz.QuizName
-                                    </strong>
-                                    <br />
+                        <option value="">
+                            All Courses
+                        </option>
 
-                                    <small>
-                                        @quiz.Course.CourseName
-                                    </small>
-                                    <br />
-
-                                    <small>
-                                        Due:
-                                        @quiz.DueDate.ToString("MMM d, yyyy")
-                                    </small>
-                                </li>
-                            }
-                        </ul>
-                    }
+                    </select>
                 </div>
 
-                <div class="col-md-4">
-                    <h5>Exams</h5>
+                <div class="col-md-2">
+                    <select name="priority"
+                            class="form-select">
 
-                    @if (!upcomingExams.Any())
-                    {
-                        <p class="text-muted">
-                            No upcoming exams.
-                        </p>
-                    }
-                    else
-                    {
-                        <ul class="list-group">
-                            @foreach (var exam in upcomingExams)
-                            {
-                                <li class="list-group-item">
-                                    <strong>
-                                        @exam.ExamName
-                                    </strong>
-                                    <br />
+                        <option value="">
+                            All Priorities
+                        </option>
 
-                                    <small>
-                                        @exam.Course.CourseName
-                                    </small>
-                                    <br />
+                        <option value="High"
+                                selected="@(selectedPriority == "High")">
+                            High
+                        </option>
 
-                                    <small>
-                                        Date:
-                                        @exam.ExamDate.ToString("MMM d, yyyy")
-                                    </small>
-                                </li>
-                            }
-                        </ul>
-                    }
+                        <option value="Medium"
+                                selected="@(selectedPriority == "Medium")">
+                            Medium
+                        </option>
+
+                        <option value="Low"
+                                selected="@(selectedPriority == "Low")">
+                            Low
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Apply
+                    </button>
                 </div>
 
             </div>
-        }
+
+            @if (filtersActive
+                        || !string.IsNullOrWhiteSpace(searchTerm))
+            {
+                <div class="text-end mt-2">
+
+                    <a asp-controller="Dashboard"
+                       asp-action="Index"
+                       class="btn btn-link btn-sm text-decoration-none">
+                        Clear Search & Filters
+                    </a>
+
+                </div>
+            }
+
+        </form>
+
     </div>
+
 </div>
 
-<div class="row g-4">
+@if (!string.IsNullOrWhiteSpace(searchTerm))
+{
+    <div class="card shadow-sm mb-4">
 
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
+        <div class="card-body">
+
+            <h4 class="mb-3">
+                Search Results for "@searchTerm"
+            </h4>
+
+            @if (!hasSearchResults)
+            {
+                <div class="alert alert-info mb-0">
+                    No matching academic records were found.
+                </div>
+            }
+            else
+            {
+                <div class="row g-4">
+
+                    @if (courseSearchResults.Any())
+                    {
+                        <div class="col-md-6">
+
+                            <h5>Courses</h5>
+
+                            <div class="list-group">
+
+                                @foreach (var result in courseSearchResults)
+                                {
+                                    var type = result.GetType();
+
+                                    var courseId =
+                                    type.GetProperty("CourseId")
+                                    ?.GetValue(result);
+
+                                    var courseName =
+                                    type.GetProperty("CourseName")
+                                    ?.GetValue(result)
+                                    ?.ToString();
+
+                                    var courseCode =
+                                    type.GetProperty("CourseCode")
+                                    ?.GetValue(result)
+                                    ?.ToString();
+
+                                    var instructor =
+                                    type.GetProperty("Instructor")
+                                    ?.GetValue(result)
+                                    ?.ToString();
+
+                                    <a asp-controller="Courses"
+                                       asp-action="Details"
+                                       asp-route-id="@courseId"
+                                       class="list-group-item list-group-item-action">
+
+                                        <strong>
+                                            @courseName
+                                        </strong>
+
+                                        @if (!string.IsNullOrWhiteSpace(courseCode))
+                                        {
+                                            <br />
+                                            <small>
+                                                @courseCode
+                                            </small>
+                                        }
+
+                                        @if (!string.IsNullOrWhiteSpace(instructor))
+                                        {
+                                            <br />
+                                            <small class="text-muted">
+                                                Instructor: @instructor
+                                            </small>
+                                        }
+
+                                    </a>
+                                }
+
+                            </div>
+
+                        </div>
+                    }
+
+                    @if (assignmentSearchResults.Any())
+                    {
+                        <div class="col-md-6">
+
+                            <h5>Assignments</h5>
+
+                            <div class="list-group">
+
+                                @foreach (var result in assignmentSearchResults)
+                                {
+                                    var type = result.GetType();
+
+                                    var assignmentId =
+                                    type.GetProperty("AssignmentId")
+                                    ?.GetValue(result);
+
+                                    var title =
+                                    type.GetProperty("Title")
+                                    ?.GetValue(result)
+                                    ?.ToString();
+
+                                    var courseName =
+                                    type.GetProperty("CourseName")
+                                    ?.GetValue(result)
+                                    ?.ToString();
+
+                                    var priority =
+                                    type.GetProperty("Priority")
+                                    ?.GetValue(result)
+                                    ?.ToString();
+
+                                    var dueDateValue =
+                                    type.GetProperty("DueDate")
+                                    ?.GetValue(result);
+
+                                    var dueDate =
+                                    dueDateValue is DateTime date
+                                    ? date.ToString("MMM d, yyyy")
+                                    : "";
+
+                                    <a asp-controller="Assignments"
+                                       asp-action="Details"
+                                       asp-route-id="@assignmentId"
+                                       class="list-group-item list-group-item-action">
+
+                                        <strong>
+                                            @title
+                                        </strong>
+
+                                        <br />
+
+                                        <small>
+                                            @courseName
+                                        </small>
+
+                                        <br />
+
+                                        <small class="text-muted">
+                                            Due: @dueDate
+                                            | Priority: @priority
+                                        </small>
+
+                                    </a>
+                                }
+
+                            </div>
+
+                        </div>
+                    }
+
+                    @if (quizSearchResults.Any())
+                    {
+                        <div class="col-md-6">
+
+                            <h5>Quizzes</h5>
+
+                            <div class="list-group">
+
+                                @foreach (var result in quizSearchResults)
+                                {
+                                    var type = result.GetType();
+
+                                    var quizId =
+                                    type.GetProperty("QuizId")
+                                    ?.GetValue(result);
+
+                                    var quizName =
+                                    type.GetProperty("QuizName")
+                                    ?.GetValue(result)
+                                    ?.ToString();
+
+                                    var courseName =
+                                    type.GetProperty("CourseName")
+                                    ?.GetValue(result)
+                                    ?.ToString();
+
+                                    var dueDateValue =
+                                    type.GetProperty("DueDate")
+                                    ?.GetValue(result);
+
+                                    var dueDate =
+                                    dueDateValue is DateTime date
+                                    ? date.ToString("MMM d, yyyy")
+                                    : "";
+
+                                    <a asp-controller="Quizzes"
+                                       asp-action="Details"
+                                       asp-route-id="@quizId"
+                                       class="list-group-item list-group-item-action">
+
+                                        <strong>
+                                            @quizName
+                                        </strong>
+
+                                        <br />
+
+                                        <small>
+                                            @courseName
+                                        </small>
+
+                                        <br />
+
+                                        <small class="text-muted">
+                                            Due: @dueDate
+                                        </small>
+
+                                    </a>
+                                }
+
+                            </div>
+
+                        </div>
+                    }
+
+                    @if (examSearchResults.Any())
+                    {
+                        <div class="col-md-6">
+
+                            <h5>Exams</h5>
+
+                            <div class="list-group">
+
+                                @foreach (var result in examSearchResults)
+                                {
+                                    var type = result.GetType();
+
+                                    var examId =
+                                    type.GetProperty("ExamId")
+                                    ?.GetValue(result);
+
+                                    var examName =
+                                    type.GetProperty("ExamName")
+                                    ?.GetValue(result)
+                                    ?.ToString();
+
+                                    var courseName =
+                                    type.GetProperty("CourseName")
+                                    ?.GetValue(result)
+                                    ?.ToString();
+
+                                    var examDateValue =
+                                    type.GetProperty("ExamDate")
+                                    ?.GetValue(result);
+
+                                    var examDate =
+                                    examDateValue is DateTime date
+                                    ? date.ToString("MMM d, yyyy")
+                                    : "";
+
+                                    <a asp-controller="Exams"
+                                       asp-action="Details"
+                                       asp-route-id="@examId"
+                                       class="list-group-item list-group-item-action">
+
+                                        <strong>
+                                            @examName
+                                        </strong>
+
+                                        <br />
+
+                                        <small>
+                                            @courseName
+                                        </small>
+
+                                        <br />
+
+                                        <small class="text-muted">
+                                            Date: @examDate
+                                        </small>
+
+                                    </a>
+                                }
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+}
+
+<div class="row g-4 mb-4">
+
+    <div class="col-lg-4">
+
+        <div class="card shadow-sm h-100">
+
             <div class="card-body">
-                <h3 class="card-title">Courses</h3>
 
-                <p class="card-text">
-                    Manage enrolled courses and academic information.
+                <h4 class="card-title">
+                    Upcoming Deadlines
+                </h4>
+
+                @if (!upcomingAssignments.Any()
+                                && !upcomingQuizzes.Any()
+                                && !upcomingExams.Any())
+                {
+                    <p class="text-muted mb-0">
+                        No upcoming deadlines.
+                    </p>
+                }
+                else
+                {
+                    @if (upcomingAssignments.Any())
+                    {
+                        <h6 class="mt-3">
+                            Assignments
+                        </h6>
+
+                        @foreach (var assignment
+                                        in upcomingAssignments.Take(2))
+                        {
+                            <div class="border-bottom py-2">
+
+                                <strong>
+                                    @assignment.Title
+                                </strong>
+
+                                <br />
+
+                                <small class="text-muted">
+                                    @assignment.Course.CourseName
+                                    ·
+                                    @assignment.DueDate.ToString("MMM d")
+                                </small>
+
+                            </div>
+                        }
+                    }
+
+                    @if (upcomingQuizzes.Any())
+                    {
+                        <h6 class="mt-3">
+                            Quizzes
+                        </h6>
+
+                        @foreach (var quiz
+                                        in upcomingQuizzes.Take(2))
+                        {
+                            <div class="border-bottom py-2">
+
+                                <strong>
+                                    @quiz.QuizName
+                                </strong>
+
+                                <br />
+
+                                <small class="text-muted">
+                                    @quiz.Course.CourseName
+                                    ·
+                                    @quiz.DueDate.ToString("MMM d")
+                                </small>
+
+                            </div>
+                        }
+                    }
+
+                    @if (upcomingExams.Any())
+                    {
+                        <h6 class="mt-3">
+                            Exams
+                        </h6>
+
+                        @foreach (var exam
+                                        in upcomingExams.Take(2))
+                        {
+                            <div class="border-bottom py-2">
+
+                                <strong>
+                                    @exam.ExamName
+                                </strong>
+
+                                <br />
+
+                                <small class="text-muted">
+                                    @exam.Course.CourseName
+                                    ·
+                                    @exam.ExamDate.ToString("MMM d")
+                                </small>
+
+                            </div>
+                        }
+                    }
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h4 class="card-title">
+                    Current Grades
+                </h4>
+
+                @if (!currentGrades.Any())
+                {
+                    <p class="text-muted mb-0">
+                        No grades available yet.
+                    </p>
+                }
+                else
+                {
+                    @foreach (var grade in currentGrades)
+                    {
+                        <div class="border-bottom py-3">
+
+                            <div class="d-flex justify-content-between">
+
+                                <strong>
+                                    @grade.CourseName
+                                </strong>
+
+                                <strong>
+                                    @($"{grade.Average:F2}%")
+                                </strong>
+
+                            </div>
+
+                        </div>
+                    }
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h4 class="card-title">
+                    Recent Study Activity
+                </h4>
+
+                @if (!recentStudySessions.Any())
+                {
+                    <p class="text-muted mb-0">
+                        No recent study sessions.
+                    </p>
+                }
+                else
+                {
+                    @foreach (var session
+                                    in recentStudySessions.Take(4))
+                    {
+                        <div class="border-bottom py-2">
+
+                            <strong>
+                                @session.Topic
+                            </strong>
+
+                            <br />
+
+                            <small class="text-muted">
+                                @session.Course.CourseName
+                                ·
+                                @session.DurationMinutes min
+                                ·
+                                @session.SessionDate.ToString("MMM d")
+                            </small>
+
+                        </div>
+                    }
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<h3 class="mb-3">
+    Academic Tools
+</h3>
+
+<div class="row g-3">
+
+    <div class="col-md-6 col-lg-3">
+
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <h5>
+                    Courses
+                </h5>
+
+                <p class="text-muted small">
+                    Manage your enrolled courses.
                 </p>
 
                 <a asp-controller="Courses"
                    asp-action="Index"
-                   class="btn btn-primary">
-                    View Courses
+                   class="btn btn-outline-primary btn-sm">
+                    Open
                 </a>
 
-                <a asp-controller="Courses"
-                   asp-action="Create"
-                   class="btn btn-success">
-                    Add Course
-                </a>
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title">Assignments</h3>
+    <div class="col-md-6 col-lg-3">
 
-                <p class="card-text">
-                    Track assignments, deadlines,
-                    priorities, and progress.
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <h5>
+                    Assignments
+                </h5>
+
+                <p class="text-muted small">
+                    Track deadlines and progress.
                 </p>
 
                 <a asp-controller="Assignments"
                    asp-action="Index"
-                   class="btn btn-primary">
-                    View Assignments
+                   class="btn btn-outline-primary btn-sm">
+                    Open
                 </a>
 
-                <a asp-controller="Assignments"
-                   asp-action="Create"
-                   class="btn btn-success">
-                    Add Assignment
-                </a>
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title">Quizzes</h3>
+    <div class="col-md-6 col-lg-3">
 
-                <p class="card-text">
-                    Track quizzes and upcoming quiz deadlines.
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <h5>
+                    Quizzes
+                </h5>
+
+                <p class="text-muted small">
+                    Review upcoming quizzes.
                 </p>
 
                 <a asp-controller="Quizzes"
                    asp-action="Index"
-                   class="btn btn-primary">
-                    View Quizzes
+                   class="btn btn-outline-primary btn-sm">
+                    Open
                 </a>
 
-                <a asp-controller="Quizzes"
-                   asp-action="Create"
-                   class="btn btn-success">
-                    Add Quiz
-                </a>
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title">Exams</h3>
+    <div class="col-md-6 col-lg-3">
 
-                <p class="card-text">
-                    Track exams and upcoming exam dates.
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <h5>
+                    Exams
+                </h5>
+
+                <p class="text-muted small">
+                    Manage upcoming exams.
                 </p>
 
                 <a asp-controller="Exams"
                    asp-action="Index"
-                   class="btn btn-primary">
-                    View Exams
+                   class="btn btn-outline-primary btn-sm">
+                    Open
                 </a>
 
-                <a asp-controller="Exams"
-                   asp-action="Create"
-                   class="btn btn-success">
-                    Add Exam
-                </a>
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title">Study Sessions</h3>
+    <div class="col-md-6 col-lg-3">
 
-                <p class="card-text">
-                    Record study activity and
-                    track focused study time.
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <h5>
+                    Study Sessions
+                </h5>
+
+                <p class="text-muted small">
+                    Track focused study time.
                 </p>
 
                 <a asp-controller="StudySessions"
                    asp-action="Index"
-                   class="btn btn-primary">
-                    View Study Sessions
+                   class="btn btn-outline-primary btn-sm">
+                    Open
                 </a>
 
-                <a asp-controller="StudySessions"
-                   asp-action="Timer"
-                   class="btn btn-success">
-                    Study Timer
-                </a>
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title">
-                    Academic Calendar
-                </h3>
+    <div class="col-md-6 col-lg-3">
 
-                <p class="card-text">
-                    View important academic dates
-                    in a monthly calendar.
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <h5>
+                    Calendar
+                </h5>
+
+                <p class="text-muted small">
+                    View academic dates.
                 </p>
 
                 <a asp-controller="Calendar"
                    asp-action="Index"
-                   class="btn btn-primary">
-                    View Calendar
+                   class="btn btn-outline-primary btn-sm">
+                    Open
                 </a>
+
             </div>
+
         </div>
+
     </div>
 
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title">Grades</h3>
+    <div class="col-md-6 col-lg-3">
 
-                <p class="card-text">
-                    Monitor grades and academic progress.
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <h5>
+                    Grades
+                </h5>
+
+                <p class="text-muted small">
+                    Review academic performance.
                 </p>
 
                 <a asp-controller="GradeRecords"
                    asp-action="Index"
-                   class="btn btn-primary">
-                    View Grades
+                   class="btn btn-outline-primary btn-sm">
+                    Open
                 </a>
 
-                <a asp-controller="GradeRecords"
-                   asp-action="Create"
-                   class="btn btn-success">
-                    Add Grade
-                </a>
             </div>
+
         </div>
+
     </div>
 
 </div>
