@@ -83,10 +83,40 @@ namespace StudentSuccessDashboard.Controllers
                     .Where(a => a.Priority == priority);
             }
 
+            var upcomingAssignmentCount =
+                await assignmentQuery.CountAsync();
+
             var upcomingAssignments = await assignmentQuery
                 .OrderBy(a => a.DueDate)
                 .Take(5)
                 .ToListAsync();
+
+            var overdueAssignments =
+                 await _context.Assignments
+                .Include(a => a.Course)
+                .Where(a =>
+                    a.Course.StudentId == student.StudentId &&
+                    a.DueDate < today &&
+                    !a.Completed)
+                .OrderBy(a => a.DueDate)
+                .Take(5)
+                .ToListAsync();
+
+            var totalAssignments =
+                await _context.Assignments
+                    .CountAsync(a =>
+                        a.Course.StudentId == student.StudentId);
+
+            var completedAssignments =
+                await _context.Assignments
+                    .CountAsync(a =>
+                        a.Course.StudentId == student.StudentId &&
+                        a.Completed);
+
+            var assignmentCompletionPercentage =
+                totalAssignments > 0
+                    ? (double)completedAssignments / totalAssignments * 100
+                    : 0;
 
             var quizQuery = _context.Quizzes
                 .Include(q => q.Course)
@@ -99,6 +129,9 @@ namespace StudentSuccessDashboard.Controllers
                 quizQuery = quizQuery
                     .Where(q => q.CourseId == courseId.Value);
             }
+
+            var upcomingQuizCount =
+                await quizQuery.CountAsync();
 
             var upcomingQuizzes = await quizQuery
                 .OrderBy(q => q.DueDate)
@@ -117,10 +150,18 @@ namespace StudentSuccessDashboard.Controllers
                     .Where(e => e.CourseId == courseId.Value);
             }
 
+            var upcomingExamCount =
+                await examQuery.CountAsync();
+
             var upcomingExams = await examQuery
                 .OrderBy(e => e.ExamDate)
                 .Take(5)
                 .ToListAsync();
+
+            var upcomingDeadlineCount =
+                upcomingAssignmentCount
+                + upcomingQuizCount
+                + upcomingExamCount;
 
             var gradeQuery = _context.GradeRecords
                 .Include(g => g.Course)
@@ -285,8 +326,14 @@ namespace StudentSuccessDashboard.Controllers
             }
 
             ViewBag.UpcomingAssignments = upcomingAssignments;
+            ViewBag.OverdueAssignments = overdueAssignments;
             ViewBag.UpcomingQuizzes = upcomingQuizzes;
+            ViewBag.TotalAssignments = totalAssignments;
+            ViewBag.CompletedAssignments = completedAssignments;
+            ViewBag.AssignmentCompletionPercentage =
+                assignmentCompletionPercentage;
             ViewBag.UpcomingExams = upcomingExams;
+            ViewBag.UpcomingDeadlineCount = upcomingDeadlineCount;
             ViewBag.CurrentGrades = currentGrades;
             ViewBag.RecentStudySessions = recentStudySessions;
 

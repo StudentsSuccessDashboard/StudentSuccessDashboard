@@ -8,6 +8,22 @@
         ViewBag.UpcomingAssignments as List<Assignment>
         ?? new List<Assignment>();
 
+    var overdueAssignments =
+        ViewBag.OverdueAssignments as List<Assignment>
+        ?? new List<Assignment>();
+
+    var upcomingDeadlineCount =
+        ViewBag.UpcomingDeadlineCount as int? ?? 0;
+
+    var totalAssignments =
+        ViewBag.TotalAssignments as int? ?? 0;
+
+    var completedAssignments =
+        ViewBag.CompletedAssignments as int? ?? 0;
+
+    var assignmentCompletionPercentage =
+        ViewBag.AssignmentCompletionPercentage as double? ?? 0;
+
     var upcomingQuizzes =
         ViewBag.UpcomingQuizzes as List<Quiz>
         ?? new List<Quiz>();
@@ -444,6 +460,87 @@
 
     </div>
 }
+@if (overdueAssignments.Any())
+{
+    <div class="card shadow-sm mb-4 border-danger">
+        <div class="card-body">
+
+            <h4 class="card-title text-danger">
+                Overdue Assignments
+            </h4>
+
+            <p class="text-muted">
+                These assignments are past their due date and
+                have not been marked as completed.
+            </p>
+
+            <div class="list-group">
+                @foreach (var assignment in overdueAssignments)
+                {
+                    <a asp-controller="Assignments"
+                       asp-action="Details"
+                       asp-route-id="@assignment.AssignmentId"
+                       class="list-group-item list-group-item-action">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+                                <strong>
+                                    @assignment.Title
+                                </strong>
+
+                                <br />
+
+                                <small class="text-muted">
+                                    @assignment.Course.CourseName
+                                </small>
+                            </div>
+
+                            <span class="badge bg-danger">
+                                Overdue:
+                                @assignment.DueDate.ToString("MMM d, yyyy")
+                            </span>
+
+                        </div>
+
+                    </a>
+                }
+            </div>
+
+        </div>
+    </div>
+}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">
+                Assignment Completion Progress
+            </h4>
+
+            <strong>
+                @($"{assignmentCompletionPercentage:F0}%")
+            </strong>
+        </div>
+
+        <p class="text-muted mt-2 mb-2">
+            @completedAssignments of @totalAssignments assignments completed.
+        </p>
+
+        <div class="progress" role="progressbar"
+             aria-valuenow="@assignmentCompletionPercentage"
+             aria-valuemin="0"
+             aria-valuemax="100">
+
+            <div class="progress-bar"
+                 style="width: @($"{assignmentCompletionPercentage:F0}%")">
+            </div>
+
+        </div>
+
+    </div>
+</div>
 
 <div class="row g-4 mb-4">
 
@@ -453,9 +550,15 @@
 
             <div class="card-body">
 
-                <h4 class="card-title">
-                    Upcoming Deadlines
-                </h4>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        Upcoming Deadlines
+                    </h4>
+
+                    <span class="badge bg-primary fs-6">
+                        @upcomingDeadlineCount
+                    </span>
+                </div>
 
                 @if (!upcomingAssignments.Any()
                                 && !upcomingQuizzes.Any()
