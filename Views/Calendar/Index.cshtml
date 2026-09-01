@@ -1,69 +1,352 @@
+@using StudentSuccessDashboard.Models
+
 @{
     ViewData["Title"] = "Academic Calendar";
+
+    var displayMonth =
+        ViewBag.DisplayMonth is DateTime month
+            ? month
+            : new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+    var previousYear = (int)ViewBag.PreviousYear;
+    var previousMonth = (int)ViewBag.PreviousMonth;
+
+    var nextYear = (int)ViewBag.NextYear;
+    var nextMonth = (int)ViewBag.NextMonth;
+
+    var assignments =
+        ViewBag.Assignments as List<Assignment>
+        ?? new List<Assignment>();
+
+    var quizzes =
+        ViewBag.Quizzes as List<Quiz>
+        ?? new List<Quiz>();
+
+    var exams =
+        ViewBag.Exams as List<Exam>
+        ?? new List<Exam>();
+
+    var daysInMonth =
+        DateTime.DaysInMonth(
+            displayMonth.Year,
+            displayMonth.Month
+        );
+
+    var firstDayOfWeek =
+        (int)displayMonth.DayOfWeek;
+
+    var today = DateTime.Today;
+
+    var totalCalendarCells =
+        firstDayOfWeek + daysInMonth;
+
+    var numberOfRows =
+        (int)Math.Ceiling(totalCalendarCells / 7.0);
 }
 
-<div class="container my-4">
-    <!-- US5-2: Month Navigation Controls -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <button id="prevMonthBtn" class="btn btn-outline-primary">&laquo; Previous</button>
-        <h3 id="calendarMonthYear" class="m-0 fw-bold"></h3>
-        <button id="nextMonthBtn" class="btn btn-outline-primary">Next &raquo;</button>
-    </div>
+<div class="container-fluid">
 
-    <!-- US5-1: Calendar Layout Grid -->
-    <div class="card shadow-sm p-3">
-        <div class="row text-center fw-bold border-bottom pb-2 mb-2">
-            <div class="col">Sun</div>
-            <div class="col">Mon</div>
-            <div class="col">Tue</div>
-            <div class="col">Wed</div>
-            <div class="col">Thu</div>
-            <div class="col">Fri</div>
-            <div class="col">Sat</div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+
+        <div>
+            <h1 class="mb-1">
+                Academic Calendar
+            </h1>
+
+            <p class="text-muted mb-0">
+                View assignments, quizzes, and exams by date.
+            </p>
         </div>
-        <div id="calendarDaysGrid" class="row text-center g-2"></div>
+
+        <a asp-controller="Dashboard"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Back to Dashboard
+        </a>
+
     </div>
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <a asp-controller="Calendar"
+                   asp-action="Index"
+                   asp-route-year="@previousYear"
+                   asp-route-month="@previousMonth"
+                   class="btn btn-outline-primary">
+                    Previous
+                </a>
+
+                <div class="text-center">
+
+                    <h2 class="mb-0">
+                        @displayMonth.ToString("MMMM yyyy")
+                    </h2>
+
+                    @if (displayMonth.Year != today.Year ||
+                                        displayMonth.Month != today.Month)
+                    {
+                        <a asp-controller="Calendar"
+                           asp-action="Index"
+                           asp-route-year="@today.Year"
+                           asp-route-month="@today.Month"
+                           class="btn btn-link btn-sm text-decoration-none">
+                            Return to Current Month
+                        </a>
+                    }
+
+                </div>
+
+                <a asp-controller="Calendar"
+                   asp-action="Index"
+                   asp-route-year="@nextYear"
+                   asp-route-month="@nextMonth"
+                   class="btn btn-outline-primary">
+                    Next
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="d-flex flex-wrap gap-3 mb-3">
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary">
+                Assignment
+            </span>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success">
+                Quiz
+            </span>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-danger">
+                Exam
+            </span>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered mb-0 align-top"
+                       style="table-layout: fixed; min-width: 900px;">
+
+                    <thead>
+                        <tr class="text-center">
+
+                            <th class="py-3">
+                                Sunday
+                            </th>
+
+                            <th class="py-3">
+                                Monday
+                            </th>
+
+                            <th class="py-3">
+                                Tuesday
+                            </th>
+
+                            <th class="py-3">
+                                Wednesday
+                            </th>
+
+                            <th class="py-3">
+                                Thursday
+                            </th>
+
+                            <th class="py-3">
+                                Friday
+                            </th>
+
+                            <th class="py-3">
+                                Saturday
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @{
+                            var currentDay = 1;
+                        }
+
+                        @for (var week = 0; week < numberOfRows; week++)
+                        {
+                            <tr>
+
+                                @for (var dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++)
+                                {
+                                    var cellNumber =
+                                    (week * 7) + dayOfWeek;
+
+                                    var shouldDisplayDay =
+                                    cellNumber >= firstDayOfWeek &&
+                                    currentDay <= daysInMonth;
+
+                                    if (shouldDisplayDay)
+                                    {
+                                        var currentDate =
+                                        new DateTime(
+                                        displayMonth.Year,
+                                        displayMonth.Month,
+                                        currentDay
+                                        );
+
+                                        var isToday =
+                                        currentDate.Date == today.Date;
+
+                                        var dayAssignments =
+                                        assignments
+                                        .Where(a =>
+                                        a.DueDate.Year == currentDate.Year &&
+                                        a.DueDate.Month == currentDate.Month &&
+                                        a.DueDate.Day == currentDate.Day)
+                                        .ToList();
+
+                                        var dayQuizzes =
+                                        quizzes
+                                        .Where(q =>
+                                        q.DueDate.Year == currentDate.Year &&
+                                        q.DueDate.Month == currentDate.Month &&
+                                        q.DueDate.Day == currentDate.Day)
+                                        .ToList();
+
+                                        var dayExams =
+                                        exams
+                                        .Where(e =>
+                                        e.ExamDate.Year == currentDate.Year &&
+                                        e.ExamDate.Month == currentDate.Month &&
+                                        e.ExamDate.Day == currentDate.Day)
+                                        .ToList();
+
+                                        <td style="height: 170px;"
+                                            class="p-2 @(isToday ? "bg-light" : "")">
+
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+
+                                                <strong class="@(isToday ? "text-primary" : "")">
+                                                    @currentDay
+                                                </strong>
+
+                                                @if (isToday)
+                                                {
+                                                    <span class="badge bg-primary">
+                                                        Today
+                                                    </span>
+                                                }
+
+                                            </div>
+
+                                            @foreach (var assignment in dayAssignments)
+                                            {
+                                                <a asp-controller="Assignments"
+                                                   asp-action="Details"
+                                                   asp-route-id="@assignment.AssignmentId"
+                                                   class="d-block text-decoration-none mb-1">
+
+                                                    <div class="badge bg-primary text-wrap w-100 text-start p-2">
+
+                                                        <strong>
+                                                            @assignment.Title
+                                                        </strong>
+
+                                                        <br />
+
+                                                        <small>
+                                                            @assignment.Course.CourseName
+                                                        </small>
+
+                                                    </div>
+
+                                                </a>
+                                            }
+
+                                            @foreach (var quiz in dayQuizzes)
+                                            {
+                                                <a asp-controller="Quizzes"
+                                                   asp-action="Details"
+                                                   asp-route-id="@quiz.QuizId"
+                                                   class="d-block text-decoration-none mb-1">
+
+                                                    <div class="badge bg-success text-wrap w-100 text-start p-2">
+
+                                                        <strong>
+                                                            @quiz.QuizName
+                                                        </strong>
+
+                                                        <br />
+
+                                                        <small>
+                                                            @quiz.Course.CourseName
+                                                        </small>
+
+                                                    </div>
+
+                                                </a>
+                                            }
+
+                                            @foreach (var exam in dayExams)
+                                            {
+                                                <a asp-controller="Exams"
+                                                   asp-action="Details"
+                                                   asp-route-id="@exam.ExamId"
+                                                   class="d-block text-decoration-none mb-1">
+
+                                                    <div class="badge bg-danger text-wrap w-100 text-start p-2">
+
+                                                        <strong>
+                                                            @exam.ExamName
+                                                        </strong>
+
+                                                        <br />
+
+                                                        <small>
+                                                            @exam.Course.CourseName
+                                                        </small>
+
+                                                    </div>
+
+                                                </a>
+                                            }
+
+                                        </td>
+
+                                        currentDay++;
+                                    }
+                                    else
+                                    {
+                                        <td style="height: 170px;"
+                                            class="bg-light">
+                                        </td>
+                                    }
+                                }
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
-
-<script>
-    let currentDate = new Date();
-
-    function renderCalendar(date) {
-        const year = date.getFullYear();
-        const month = date.getMonth();
-
-        const monthNames = ["January", "February", "March", "April", "May", "June", 
-                            "July", "August", "September", "October", "November", "December"];
-        document.getElementById("calendarMonthYear").innerText = `${monthNames[month]} ${year}`;
-
-        const firstDay = new Date(year, month, 1).getDay();
-        const totalDays = new Date(year, month + 1, 0).getDate();
-
-        const grid = document.getElementById("calendarDaysGrid");
-        grid.innerHTML = "";
-
-        // Empty padding cells for previous month days
-        for (let i = 0; i < firstDay; i++) {
-            grid.innerHTML += `<div class="col p-3 border rounded bg-light text-muted opacity-25"></div>`;
-        }
-
-        // Active days of the month
-        for (let day = 1; day <= totalDays; day++) {
-            grid.innerHTML += `<div class="col p-3 border rounded bg-white shadow-sm">
-                <span class="fw-bold">${day}</span>
-            </div>`;
-        }
-    }
-
-    document.getElementById("prevMonthBtn").addEventListener("click", () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderCalendar(currentDate);
-    });
-
-    document.getElementById("nextMonthBtn").addEventListener("click", () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderCalendar(currentDate);
-    });
-
-    renderCalendar(currentDate);
-</script>

@@ -1,52 +1,63 @@
 @model StudentSuccessDashboard.Models.Quiz
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Quiz Details";
 }
 
-<h1>Details</h1>
+<h1>Quiz Details</h1>
 
 <div>
     <h4>Quiz</h4>
     <hr />
+
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.QuizName)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.QuizName)
         </dd>
-    </dl>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.DueDate)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.DueDate)
         </dd>
-    </dl>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.PointsPossible)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.PointsPossible)
         </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CourseId)
+
+        <dt class="col-sm-3">
+            Course
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CourseId)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Course)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Course)
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Course.CourseName)
         </dd>
     </dl>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.QuizId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="d-flex flex-wrap gap-2">
+    <a asp-action="Edit"
+       asp-route-id="@Model?.QuizId"
+       class="btn btn-primary">
+        Edit
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back to List
+    </a>
+
+    <a asp-controller="Calendar"
+       asp-action="Index"
+       asp-route-year="@Model.DueDate.Year"
+       asp-route-month="@Model.DueDate.Month"
+       class="btn btn-outline-primary">
+        Back to Calendar
+    </a>
 </div>
