@@ -41,7 +41,23 @@
     </dl>
 </div>
 
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.ExamId" class="btn btn-primary">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+<div class="d-flex flex-wrap gap-2">
+    <a asp-action="Edit"
+       asp-route-id="@Model.ExamId"
+       class="btn btn-primary">
+        Edit
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back to List
+    </a>
+
+    <a asp-controller="Calendar"
+       asp-action="Index"
+       asp-route-year="@Model.ExamDate.Year"
+       asp-route-month="@Model.ExamDate.Month"
+       class="btn btn-outline-primary">
+        Back to Calendar
+    </a>
 </div>

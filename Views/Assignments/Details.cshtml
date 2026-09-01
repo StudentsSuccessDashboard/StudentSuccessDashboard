@@ -31,7 +31,24 @@
         <dd class="col-sm-9">@Html.DisplayFor(model => model.PointsPossible)</dd>
     </dl>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.AssignmentId" class="btn btn-primary">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+
+<div class="d-flex flex-wrap gap-2">
+    <a asp-action="Edit"
+       asp-route-id="@Model?.AssignmentId"
+       class="btn btn-primary">
+        Edit
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back to List
+    </a>
+
+    <a asp-controller="Calendar"
+       asp-action="Index"
+       asp-route-year="@Model.DueDate.Year"
+       asp-route-month="@Model.DueDate.Month"
+       class="btn btn-outline-primary">
+        Back to Calendar
+    </a>
 </div>

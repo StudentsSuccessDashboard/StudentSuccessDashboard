@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - StudentSuccessDashboard</title>
 
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem("studentDashboardTheme");
+
+            if (savedTheme === "dark") {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/StudentSuccessDashboard.styles.css" asp-append-version="true" />
@@ -13,7 +23,7 @@
 <body>
 
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
 
             <div class="container-fluid">
 
@@ -41,7 +51,7 @@
                     <ul class="navbar-nav flex-grow-1">
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark"
+                            <a class="nav-link"
                                asp-area=""
                                asp-controller="Dashboard"
                                asp-action="Index">
@@ -50,7 +60,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark"
+                            <a class="nav-link"
                                asp-area=""
                                asp-controller="Semesters"
                                asp-action="Index">
@@ -59,7 +69,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark"
+                            <a class="nav-link"
                                asp-area=""
                                asp-controller="Home"
                                asp-action="Index">
@@ -68,7 +78,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark"
+                            <a class="nav-link"
                                asp-area=""
                                asp-controller="Home"
                                asp-action="Privacy">
@@ -78,12 +88,31 @@
 
                     </ul>
 
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav align-items-sm-center">
+
+                        <li class="nav-item me-sm-2">
+
+                            <button type="button"
+                                    id="themeToggle"
+                                    class="btn btn-outline-secondary btn-sm theme-toggle"
+                                    aria-label="Toggle dark mode">
+
+                                <span id="themeIcon">
+                                    🌙
+                                </span>
+
+                                <span id="themeText">
+                                    Dark
+                                </span>
+
+                            </button>
+
+                        </li>
 
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
+                                <a class="nav-link"
                                    asp-controller="Profile"
                                    asp-action="Index">
                                     Profile
@@ -91,7 +120,7 @@
                             </li>
 
                             <li class="nav-item">
-                                <span class="nav-link text-dark">
+                                <span class="nav-link">
                                     Hello @User.Identity.Name!
                                 </span>
                             </li>
@@ -102,7 +131,7 @@
                                       method="post">
 
                                     <button type="submit"
-                                            class="nav-link btn btn-link text-dark">
+                                            class="nav-link btn btn-link">
                                         Logout
                                     </button>
 
@@ -112,7 +141,7 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
+                                <a class="nav-link"
                                    asp-area="Identity"
                                    asp-page="/Account/Register">
                                     Register
@@ -120,7 +149,7 @@
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
+                                <a class="nav-link"
                                    asp-area="Identity"
                                    asp-page="/Account/Login">
                                     Login
@@ -166,6 +195,71 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const toggleButton =
+                document.getElementById("themeToggle");
+
+            const themeIcon =
+                document.getElementById("themeIcon");
+
+            const themeText =
+                document.getElementById("themeText");
+
+            function updateThemeButton() {
+
+                const isDark =
+                    document.documentElement
+                        .getAttribute("data-theme") === "dark";
+
+                if (isDark) {
+                    themeIcon.textContent = "☀️";
+                    themeText.textContent = "Light";
+                }
+                else {
+                    themeIcon.textContent = "🌙";
+                    themeText.textContent = "Dark";
+                }
+            }
+
+            updateThemeButton();
+
+            toggleButton.addEventListener("click", function () {
+
+                const isDark =
+                    document.documentElement
+                        .getAttribute("data-theme") === "dark";
+
+                if (isDark) {
+
+                    document.documentElement
+                        .removeAttribute("data-theme");
+
+                    localStorage.setItem(
+                        "studentDashboardTheme",
+                        "light"
+                    );
+                }
+                else {
+
+                    document.documentElement
+                        .setAttribute(
+                            "data-theme",
+                            "dark"
+                        );
+
+                    localStorage.setItem(
+                        "studentDashboardTheme",
+                        "dark"
+                    );
+                }
+
+                updateThemeButton();
+            });
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 

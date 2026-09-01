@@ -1,22 +1,551 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+
+/* =========================================================
+   THEME VARIABLES
+   ========================================================= */
+
+:root {
+    --page-bg: #f7f9fc;
+    --surface: #ffffff;
+    --surface-soft: #f5f7fa;
+    --surface-hover: #f7f9fc;
+    --text-main: #263238;
+    --text-heading: #243447;
+    --text-muted: #6c7a89;
+    --border-main: #dce3ea;
+    --border-soft: #edf0f3;
+    --navbar-bg: #ffffff;
+    --shadow-soft: rgba(36, 52, 71, 0.07);
+    --shadow-medium: rgba(36, 52, 71, 0.12);
+    --primary-soft: #f8fbff;
+}
+
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --page-bg: #121820;
+    --surface: #1b2430;
+    --surface-soft: #222d3a;
+    --surface-hover: #263341;
+    --text-main: #dce5ef;
+    --text-heading: #f1f5f9;
+    --text-muted: #a8b5c4;
+    --border-main: #354353;
+    --border-soft: #2e3b49;
+    --navbar-bg: #18212c;
+    --shadow-soft: rgba(0, 0, 0, 0.18);
+    --shadow-medium: rgba(0, 0, 0, 0.28);
+    --primary-soft: #202d3c;
+}
+
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.1rem var(--surface), 0 0 0 0.25rem rgba(37, 140, 251, 0.35);
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    background: var(--page-bg);
+    color: var(--text-main);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+
+/* =========================================================
+   GENERAL PAGE STYLING
+   ========================================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 650;
+    color: var(--text-heading);
+}
+
+h1 {
+    letter-spacing: -0.03em;
+}
+
+h3 {
+    margin-top: 0.5rem;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+a {
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.navbar {
+    background-color: var(--navbar-bg);
+    border-color: var(--border-main) !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.navbar-brand {
+    color: var(--text-heading) !important;
+    font-weight: 650;
+}
+
+.navbar .nav-link {
+    color: var(--text-main) !important;
+}
+
+    .navbar .nav-link:hover {
+        color: #0d6efd !important;
+    }
+
+.navbar-toggler {
+    border-color: var(--border-main);
+}
+
+html[data-theme="dark"] .navbar-toggler-icon {
+    filter: invert(1);
+}
+
+.theme-toggle {
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card {
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    background-color: var(--surface);
+    color: var(--text-main);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.2s ease;
+}
+
+    .card.shadow-sm {
+        box-shadow: 0 5px 18px var(--shadow-soft) !important;
+    }
+
+.card-body {
+    padding: 1.35rem;
+}
+
+.card-title {
+    font-weight: 650;
+    letter-spacing: -0.015em;
+}
+
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+.form-control,
+.form-select {
+    background-color: var(--surface);
+    color: var(--text-main);
+    border-color: var(--border-main);
+}
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+form .form-control,
+form .form-select {
+    border-radius: 9px;
+    min-height: 40px;
+}
+
+    form .form-control:hover,
+    form .form-select:hover {
+        border-color: #8da0b3;
+    }
+
+    form .form-control:focus,
+    form .form-select:focus {
+        border-color: #258cfb;
+        background-color: var(--surface);
+        color: var(--text-main);
+    }
+
+html[data-theme="dark"] .form-select {
+    background-color: var(--surface);
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.btn {
+    border-radius: 9px;
+    font-weight: 500;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+
+.btn-primary {
+    box-shadow: 0 3px 8px rgba(13, 110, 253, 0.18);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-success:hover {
+    box-shadow: 0 3px 8px var(--shadow-medium);
+}
+
+.btn-outline-secondary {
+    color: var(--text-main);
+    border-color: var(--border-main);
+}
+
+    .btn-outline-secondary:hover {
+        color: #ffffff;
+    }
+
+
+/* =========================================================
+   QUICK ACTIONS
+   ========================================================= */
+
+.card:has(.card-title:first-child) {
+    overflow: hidden;
+}
+
+.card .d-flex.flex-wrap.gap-2 .btn {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+
+/* =========================================================
+   ASSIGNMENT PROGRESS
+   ========================================================= */
+
+.progress {
+    height: 12px;
+    border-radius: 50px;
+    background-color: var(--surface-soft);
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 50px;
+    transition: width 0.4s ease;
+}
+
+
+/* =========================================================
+   OVERDUE ASSIGNMENTS
+   ========================================================= */
+
+.card.border-danger {
+    border-width: 1px !important;
+    border-left-width: 4px !important;
+}
+
+    .card.border-danger .list-group-item {
+        border-left: 0;
+        border-right: 0;
+    }
+
+
+/* =========================================================
+   SUMMARY WIDGETS
+   ========================================================= */
+
+.row.g-4.mb-4 > .col-lg-4 > .card {
+    position: relative;
+    overflow: hidden;
+}
+
+.row.g-4.mb-4 > .col-lg-4:nth-child(1) > .card {
+    border-top: 4px solid #0d6efd;
+}
+
+.row.g-4.mb-4 > .col-lg-4:nth-child(2) > .card {
+    border-top: 4px solid #198754;
+}
+
+.row.g-4.mb-4 > .col-lg-4:nth-child(3) > .card {
+    border-top: 4px solid #6f42c1;
+}
+
+.row.g-4.mb-4 > .col-lg-4 > .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 24px var(--shadow-medium) !important;
+}
+
+.badge {
+    border-radius: 50px;
+    padding: 0.45em 0.7em;
+}
+
+
+/* =========================================================
+   WEEKLY CALENDAR / STUDY SUMMARY
+   ========================================================= */
+
+.bg-light {
+    background-color: var(--surface-soft) !important;
+    color: var(--text-main) !important;
+}
+
+.bg-white {
+    background-color: var(--surface) !important;
+}
+
+.border.rounded.p-3,
+.border.rounded.p-2 {
+    border-color: var(--border-main) !important;
+    border-radius: 11px !important;
+}
+
+html[data-theme="dark"] .border-primary {
+    border-color: #4d9aff !important;
+}
+
+
+/* =========================================================
+   TABLES / FULL CALENDAR
+   ========================================================= */
+
+.table {
+    color: var(--text-main);
+    border-color: var(--border-main);
+}
+
+    .table > :not(caption) > * > * {
+        background-color: var(--surface);
+        color: var(--text-main);
+        border-color: var(--border-main);
+    }
+
+    .table thead th {
+        background-color: var(--surface-soft);
+        color: var(--text-heading);
+    }
+
+html[data-theme="dark"] .table .bg-light {
+    background-color: var(--surface-soft) !important;
+}
+
+
+/* =========================================================
+   LISTS
+   ========================================================= */
+
+.list-group {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.list-group-item {
+    background-color: var(--surface);
+    color: var(--text-main);
+    border-color: var(--border-soft);
+    transition: background-color 0.15s ease, padding-left 0.15s ease;
+}
+
+.list-group-item-action:hover {
+    background-color: var(--surface-hover);
+    color: var(--text-main);
+    padding-left: 1.15rem;
+}
+
+.list-group-item strong {
+    color: var(--text-heading);
+}
+
+
+/* =========================================================
+   SEARCH RESULTS / ALERTS
+   ========================================================= */
+
+.alert {
+    border-radius: 10px;
+    border-width: 1px;
+}
+
+html[data-theme="dark"] .alert-info {
+    color: #b9e3f5;
+    background-color: #193541;
+    border-color: #29566a;
+}
+
+
+/* =========================================================
+   ACADEMIC TOOLS
+   ========================================================= */
+
+h3.mb-3 {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.55rem;
+    margin-top: 2rem;
+    margin-bottom: 1.35rem !important;
+}
+
+    h3.mb-3::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 55px;
+        height: 4px;
+        border-radius: 10px;
+        background: #0d6efd;
+    }
+
+.row.g-3 > .col-md-6 > .card {
+    position: relative;
+    overflow: hidden;
+    min-height: 165px;
+    border: 1px solid rgba(13, 110, 253, 0.12);
+    box-shadow: 0 5px 16px var(--shadow-soft);
+}
+
+    .row.g-3 > .col-md-6 > .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient( 90deg, #0d6efd, #6ea8fe );
+    }
+
+    .row.g-3 > .col-md-6 > .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 28px var(--shadow-medium);
+        border-color: rgba(13, 110, 253, 0.3);
+    }
+
+    .row.g-3 > .col-md-6 > .card .card-body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .row.g-3 > .col-md-6 > .card h5 {
+        font-size: 1.15rem;
+        margin-bottom: 0.65rem;
+        font-weight: 700;
+    }
+
+    .row.g-3 > .col-md-6 > .card p {
+        margin-bottom: 1.2rem;
+        line-height: 1.5;
+    }
+
+    .row.g-3 > .col-md-6 > .card .btn {
+        margin-top: auto;
+        align-self: flex-start;
+        padding: 0.4rem 0.9rem;
+        font-weight: 600;
+        background-color: var(--primary-soft);
+    }
+
+        .row.g-3 > .col-md-6 > .card .btn:hover {
+            background-color: #0d6efd;
+            color: #ffffff;
+        }
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.footer {
+    color: var(--text-muted) !important;
+    border-color: var(--border-main) !important;
+}
+
+    .footer a {
+        color: #0d6efd;
+    }
+
+
+/* =========================================================
+   DEFINITION LISTS / DETAILS PAGES
+   ========================================================= */
+
+dt {
+    color: var(--text-heading);
+}
+
+dd {
+    color: var(--text-main);
+}
+
+hr {
+    border-color: var(--border-main);
+    opacity: 1;
+}
+
+
+/* =========================================================
+   RESPONSIVE POLISH
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+    .card-body {
+        padding: 1.1rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .card .d-flex.flex-wrap.gap-2 {
+        width: 100%;
+    }
+
+        .card .d-flex.flex-wrap.gap-2 .btn {
+            flex-grow: 1;
+        }
+
+    .theme-toggle {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
 }

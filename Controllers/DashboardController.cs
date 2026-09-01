@@ -49,6 +49,15 @@ namespace StudentSuccessDashboard.Controllers
                 DateTimeKind.Utc
             );
 
+            var daysSinceMonday =
+                ((int)today.DayOfWeek + 6) % 7;
+
+            var weekStart =
+                today.AddDays(-daysSinceMonday);
+
+            var weekEnd =
+                weekStart.AddDays(7);
+
             var studentCourses = await _context.Courses
                 .Where(c => c.StudentId == student.StudentId)
                 .OrderBy(c => c.CourseName)
@@ -92,15 +101,15 @@ namespace StudentSuccessDashboard.Controllers
                 .ToListAsync();
 
             var overdueAssignments =
-                 await _context.Assignments
-                .Include(a => a.Course)
-                .Where(a =>
-                    a.Course.StudentId == student.StudentId &&
-                    a.DueDate < today &&
-                    !a.Completed)
-                .OrderBy(a => a.DueDate)
-                .Take(5)
-                .ToListAsync();
+                await _context.Assignments
+                    .Include(a => a.Course)
+                    .Where(a =>
+                        a.Course.StudentId == student.StudentId &&
+                        a.DueDate < today &&
+                        !a.Completed)
+                    .OrderBy(a => a.DueDate)
+                    .Take(5)
+                    .ToListAsync();
 
             var totalAssignments =
                 await _context.Assignments
@@ -115,7 +124,8 @@ namespace StudentSuccessDashboard.Controllers
 
             var assignmentCompletionPercentage =
                 totalAssignments > 0
-                    ? (double)completedAssignments / totalAssignments * 100
+                    ? (double)completedAssignments
+                        / totalAssignments * 100
                     : 0;
 
             var quizQuery = _context.Quizzes
@@ -202,9 +212,45 @@ namespace StudentSuccessDashboard.Controllers
                     .Where(s => s.CourseId == courseId.Value);
             }
 
+            var weeklyStudyMinutes =
+                await studyQuery
+                    .Where(s =>
+                        s.SessionDate >= weekStart &&
+                        s.SessionDate < weekEnd)
+                    .SumAsync(s => (int?)s.DurationMinutes)
+                ?? 0;
+
             var recentStudySessions = await studyQuery
                 .OrderByDescending(s => s.SessionDate)
                 .Take(5)
+                .ToListAsync();
+
+            // Weekly mini calendar
+            var weeklyAssignments = await _context.Assignments
+                .Include(a => a.Course)
+                .Where(a =>
+                    a.Course.StudentId == student.StudentId &&
+                    a.DueDate >= weekStart &&
+                    a.DueDate < weekEnd)
+                .OrderBy(a => a.DueDate)
+                .ToListAsync();
+
+            var weeklyQuizzes = await _context.Quizzes
+                .Include(q => q.Course)
+                .Where(q =>
+                    q.Course.StudentId == student.StudentId &&
+                    q.DueDate >= weekStart &&
+                    q.DueDate < weekEnd)
+                .OrderBy(q => q.DueDate)
+                .ToListAsync();
+
+            var weeklyExams = await _context.Exams
+                .Include(e => e.Course)
+                .Where(e =>
+                    e.Course.StudentId == student.StudentId &&
+                    e.ExamDate >= weekStart &&
+                    e.ExamDate < weekEnd)
+                .OrderBy(e => e.ExamDate)
                 .ToListAsync();
 
             var courseSearchResults = new List<object>();
@@ -336,6 +382,14 @@ namespace StudentSuccessDashboard.Controllers
             ViewBag.UpcomingDeadlineCount = upcomingDeadlineCount;
             ViewBag.CurrentGrades = currentGrades;
             ViewBag.RecentStudySessions = recentStudySessions;
+
+            ViewBag.WeeklyStudyMinutes = weeklyStudyMinutes;
+            ViewBag.WeekStart = weekStart;
+            ViewBag.WeekEnd = weekEnd.AddDays(-1);
+
+            ViewBag.WeeklyAssignments = weeklyAssignments;
+            ViewBag.WeeklyQuizzes = weeklyQuizzes;
+            ViewBag.WeeklyExams = weeklyExams;
 
             ViewBag.SearchTerm = searchTerm;
             ViewBag.CourseSearchResults = courseSearchResults;
