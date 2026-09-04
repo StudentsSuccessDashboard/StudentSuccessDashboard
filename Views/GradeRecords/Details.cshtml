@@ -4,49 +4,92 @@
     ViewData["Title"] = "Grade Details";
 }
 
-<h1>Grade Details</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
 
-<hr />
+    <div>
+        <h1 class="mb-1">Grade Details</h1>
 
-<dl class="row">
-    <dt class="col-sm-3">
-        Category
-    </dt>
-    <dd class="col-sm-9">
-        @Model.Category
-    </dd>
+        <p class="text-muted mb-0">
+            Review the selected grade record.
+        </p>
+    </div>
 
-    <dt class="col-sm-3">
-        Score
-    </dt>
-    <dd class="col-sm-9">
-        @Model.Score.ToString("0.##")%
-    </dd>
+    <a asp-controller="Dashboard"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Back to Dashboard
+    </a>
 
-    <dt class="col-sm-3">
-        Weight
-    </dt>
-    <dd class="col-sm-9">
-        @Model.Weight.ToString("0.##")%
-    </dd>
+</div>
 
-    <dt class="col-sm-3">
-        Course
-    </dt>
-    <dd class="col-sm-9">
-        @Model.Course?.CourseName
-    </dd>
-</dl>
+<div class="card shadow-sm">
 
-<div>
+    <div class="card-body">
+
+        <dl class="row mb-0">
+
+            <dt class="col-sm-3">
+                Course
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Course.CourseName
+            </dd>
+
+            <dt class="col-sm-3">
+                Category
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Category
+            </dd>
+
+            <dt class="col-sm-3">
+                Score
+            </dt>
+
+            <dd class="col-sm-9">
+
+                <span class="badge
+                    @(Model.Score >= 90
+                                              ? "bg-success"
+                                              : Model.Score >= 80
+                                                  ? "bg-primary"
+                                                  : Model.Score >= 70
+                                                      ? "bg-warning text-dark"
+                                                      : "bg-danger")">
+
+                    @Model.Score.ToString("0.##")%
+
+                </span>
+
+            </dd>
+
+            <dt class="col-sm-3">
+                Category Weight
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Weight.ToString("0.##")%
+            </dd>
+
+        </dl>
+
+    </div>
+
+</div>
+
+<div class="d-flex flex-wrap gap-2 mt-3">
+
     <a asp-action="Edit"
        asp-route-id="@Model.GradeRecordId"
        class="btn btn-primary">
-        Edit
+        Edit Grade
     </a>
 
     <a asp-action="Index"
        class="btn btn-secondary">
         Back to Grades
     </a>
+
 </div>

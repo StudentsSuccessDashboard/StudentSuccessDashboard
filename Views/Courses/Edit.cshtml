@@ -4,55 +4,145 @@
     ViewData["Title"] = "Edit Course";
 }
 
-<h1>Edit Course</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
 
-<h4>Course</h4>
-<hr />
-
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <input type="hidden" asp-for="CourseId" />
-
-            <div class="form-group mb-3">
-                <label asp-for="CourseName" class="control-label"></label>
-                <input asp-for="CourseName" class="form-control" />
-                <span asp-validation-for="CourseName" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="CourseCode" class="control-label"></label>
-                <input asp-for="CourseCode" class="form-control" />
-                <span asp-validation-for="CourseCode" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Instructor" class="control-label"></label>
-                <input asp-for="Instructor" class="form-control" />
-                <span asp-validation-for="Instructor" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Credits" class="control-label"></label>
-                <input asp-for="Credits" class="form-control" />
-                <span asp-validation-for="Credits" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="StudentId" class="control-label"></label>
-                <select asp-for="StudentId" class="form-control" asp-items="ViewBag.StudentId"></select>
-                <span asp-validation-for="StudentId" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-            </div>
-
-        </form>
+    <div>
+        <h1 class="mb-1">Edit Course</h1>
+        <p class="text-muted mb-0">
+            Update the course information below.
+        </p>
     </div>
+
+    <a asp-controller="Dashboard"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Back to Dashboard
+    </a>
+
+</div>
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-lg-7 col-md-9">
+
+                <form asp-action="Edit">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger">
+                    </div>
+
+                    <input type="hidden"
+                           asp-for="CourseId" />
+
+                    <div class="mb-3">
+
+                        <label asp-for="CourseName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="CourseName"
+                               class="form-control" />
+
+                        <span asp-validation-for="CourseName"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="CourseCode"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="CourseCode"
+                               class="form-control" />
+
+                        <span asp-validation-for="CourseCode"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="Instructor"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="Instructor"
+                               class="form-control" />
+
+                        <span asp-validation-for="Instructor"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="Credits"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="Credits"
+                               class="form-control" />
+
+                        <span asp-validation-for="Credits"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label asp-for="SemesterId"
+                               class="form-label">
+                            Semester
+                        </label>
+
+                        <select asp-for="SemesterId"
+                                asp-items="ViewBag.SemesterId"
+                                class="form-select">
+
+                            <option value="">
+                                Select a semester
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="SemesterId"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="d-flex gap-2">
+
+                        <button type="submit"
+                                class="btn btn-primary">
+                            Save Changes
+                        </button>
+
+                        <a asp-action="Index"
+                           class="btn btn-secondary">
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
 @section Scripts {

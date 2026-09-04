@@ -1,54 +1,138 @@
 @model StudentSuccessDashboard.Models.Quiz
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Quiz";
 }
 
-<h1>Edit</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
 
-<h4>Quiz</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="QuizId" />
-            <div class="form-group">
-                <label asp-for="QuizName" class="control-label"></label>
-                <input asp-for="QuizName" class="form-control" />
-                <span asp-validation-for="QuizName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DueDate" class="control-label"></label>
-                <input asp-for="DueDate" class="form-control" />
-                <span asp-validation-for="DueDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PointsPossible" class="control-label"></label>
-                <input asp-for="PointsPossible" class="form-control" />
-                <span asp-validation-for="PointsPossible" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CourseId" class="control-label"></label>
-                <input asp-for="CourseId" class="form-control" />
-                <span asp-validation-for="CourseId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Course" class="control-label"></label>
-                <input asp-for="Course" class="form-control" />
-                <span asp-validation-for="Course" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <div>
+        <h1 class="mb-1">Edit Quiz</h1>
+        <p class="text-muted mb-0">
+            Update the quiz information below.
+        </p>
     </div>
+
+    <a asp-controller="Dashboard"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Back to Dashboard
+    </a>
+
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-lg-7 col-md-9">
+
+                <form asp-action="Edit">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger">
+                    </div>
+
+                    <input type="hidden"
+                           asp-for="QuizId" />
+
+                    <div class="mb-3">
+
+                        <label asp-for="QuizName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="QuizName"
+                               class="form-control" />
+
+                        <span asp-validation-for="QuizName"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="DueDate"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="DueDate"
+                               class="form-control"
+                               type="datetime-local" />
+
+                        <span asp-validation-for="DueDate"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="PointsPossible"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="PointsPossible"
+                               class="form-control" />
+
+                        <span asp-validation-for="PointsPossible"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label asp-for="CourseId"
+                               class="form-label">
+                            Course
+                        </label>
+
+                        <select asp-for="CourseId"
+                                class="form-select"
+                                asp-items="ViewBag.CourseId">
+
+                            <option value="">
+                                Select a course
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="CourseId"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <button type="submit"
+                                class="btn btn-primary">
+                            Save Changes
+                        </button>
+
+                        <a asp-action="Index"
+                           class="btn btn-secondary">
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

@@ -4,48 +4,89 @@
     ViewData["Title"] = "Delete Exam";
 }
 
-<h1>Delete Exam</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
 
-<h3>Are you sure you want to delete this exam?</h3>
+    <div>
+        <h1 class="mb-1">Delete Exam</h1>
+        <p class="text-muted mb-0">
+            Review the exam before permanently deleting it.
+        </p>
+    </div>
 
-<div>
-    <h4>Exam</h4>
-    <hr />
+    <a asp-controller="Dashboard"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Back to Dashboard
+    </a>
 
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.ExamName)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.ExamName)
-        </dd>
+</div>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.ExamDate)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.ExamDate)
-        </dd>
+<div class="card shadow-sm border-danger">
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.PointsPossible)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.PointsPossible)
-        </dd>
+    <div class="card-body">
 
-        <dt class="col-sm-3">
-            Course
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Course.CourseName)
-        </dd>
-    </dl>
+        <div class="alert alert-danger">
+            Are you sure you want to delete this exam?
+            This action cannot be undone.
+        </div>
 
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="ExamId" />
+        <dl class="row">
 
-        <input type="submit" value="Delete" class="btn btn-danger" />
-        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-    </form>
+            <dt class="col-sm-3">
+                Course
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Course.CourseName
+            </dd>
+
+            <dt class="col-sm-3">
+                Exam
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.ExamName
+            </dd>
+
+            <dt class="col-sm-3">
+                Exam Date
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.ExamDate.ToString("F")
+            </dd>
+
+            <dt class="col-sm-3">
+                Points Possible
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.PointsPossible
+            </dd>
+
+        </dl>
+
+        <form asp-action="Delete">
+
+            <input type="hidden"
+                   asp-for="ExamId" />
+
+            <div class="d-flex flex-wrap gap-2">
+
+                <button type="submit"
+                        class="btn btn-danger">
+                    Delete Exam
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
 </div>

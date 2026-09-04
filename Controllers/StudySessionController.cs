@@ -13,83 +13,182 @@ namespace StudentSuccessDashboard.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        public StudySessionsController(ApplicationDbContext context)
+        public StudySessionsController(
+            ApplicationDbContext context)
         {
             _context = context;
         }
 
+        private async Task<Student?> GetCurrentStudentAsync()
+        {
+            var userId = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
+
+            if (userId == null)
+            {
+                return null;
+            }
+
+            return await _context.Students
+                .FirstOrDefaultAsync(
+                    s => s.UserId == userId
+                );
+        }
+
+        private async Task<SelectList?> GetCourseSelectListAsync(
+            int? selectedCourseId = null)
+        {
+            var student =
+                await GetCurrentStudentAsync();
+
+            if (student == null)
+            {
+                return null;
+            }
+
+            var courses =
+                await _context.Courses
+                    .Where(c =>
+                        c.StudentId
+                        == student.StudentId)
+                    .OrderBy(c => c.CourseName)
+                    .ToListAsync();
+
+            return new SelectList(
+                courses,
+                "CourseId",
+                "CourseName",
+                selectedCourseId
+            );
+        }
+
+
+        // GET: StudySessions
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId =
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier
+                );
 
             if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var studySessions = await _context.StudySessions
-                .Include(s => s.Course)
-                .Where(s => s.UserId == userId)
-                .OrderByDescending(s => s.SessionDate)
-                .ToListAsync();
+            var studySessions =
+                await _context.StudySessions
+                    .Include(s => s.Course)
+                    .Where(s =>
+                        s.UserId == userId)
+                    .OrderByDescending(
+                        s => s.SessionDate)
+                    .ToListAsync();
 
             return View(studySessions);
         }
 
-        public IActionResult Create()
+
+        // GET: StudySessions/Create
+        public async Task<IActionResult> Create()
         {
-            ViewBag.CourseId = new SelectList(
-                _context.Courses,
-                "CourseId",
-                "CourseName"
-            );
+            var courseList =
+                await GetCourseSelectListAsync();
+
+            if (courseList == null)
+            {
+                return Unauthorized();
+            }
+
+            ViewBag.CourseId = courseList;
 
             return View();
         }
 
+
+        // POST: StudySessions/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             StudySession studySession)
         {
             var userId =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier
+                );
 
-            if (userId == null)
+            var student =
+                await GetCurrentStudentAsync();
+
+            if (userId == null ||
+                student == null)
             {
                 return Unauthorized();
             }
 
+            var courseBelongsToStudent =
+                await _context.Courses
+                    .AnyAsync(c =>
+                        c.CourseId
+                        == studySession.CourseId
+                        &&
+                        c.StudentId
+                        == student.StudentId);
+
+            if (!courseBelongsToStudent)
+            {
+                ModelState.AddModelError(
+                    nameof(StudySession.CourseId),
+                    "Please select one of your courses."
+                );
+            }
+
             studySession.UserId = userId;
 
-            studySession.SessionDate = DateTime.SpecifyKind(
-                studySession.SessionDate,
-                DateTimeKind.Utc
+            studySession.SessionDate =
+                DateTime.SpecifyKind(
+                    studySession.SessionDate,
+                    DateTimeKind.Utc
+                );
+
+            ModelState.Remove(
+                nameof(StudySession.UserId)
             );
 
-            ModelState.Remove(nameof(StudySession.UserId));
-            ModelState.Remove(nameof(StudySession.User));
-            ModelState.Remove(nameof(StudySession.Course));
+            ModelState.Remove(
+                nameof(StudySession.User)
+            );
+
+            ModelState.Remove(
+                nameof(StudySession.Course)
+            );
 
             if (ModelState.IsValid)
             {
-                _context.StudySessions.Add(studySession);
+                _context.StudySessions.Add(
+                    studySession
+                );
+
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(
+                    nameof(Index)
+                );
             }
 
-            ViewBag.CourseId = new SelectList(
-                _context.Courses,
-                "CourseId",
-                "CourseName",
-                studySession.CourseId
-            );
+            ViewBag.CourseId =
+                await GetCourseSelectListAsync(
+                    studySession.CourseId
+                );
 
             return View(studySession);
         }
 
-        public async Task<IActionResult> Edit(int? id)
+
+        // GET: StudySessions/Edit/5
+        public async Task<IActionResult> Edit(
+            int? id)
         {
             if (id == null)
             {
@@ -97,7 +196,9 @@ namespace StudentSuccessDashboard.Controllers
             }
 
             var userId =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier
+                );
 
             if (userId == null)
             {
@@ -107,7 +208,8 @@ namespace StudentSuccessDashboard.Controllers
             var studySession =
                 await _context.StudySessions
                     .FirstOrDefaultAsync(s =>
-                        s.StudySessionId == id &&
+                        s.StudySessionId == id
+                        &&
                         s.UserId == userId);
 
             if (studySession == null)
@@ -115,16 +217,16 @@ namespace StudentSuccessDashboard.Controllers
                 return NotFound();
             }
 
-            ViewBag.CourseId = new SelectList(
-                _context.Courses,
-                "CourseId",
-                "CourseName",
-                studySession.CourseId
-            );
+            ViewBag.CourseId =
+                await GetCourseSelectListAsync(
+                    studySession.CourseId
+                );
 
             return View(studySession);
         }
 
+
+        // POST: StudySessions/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -137,9 +239,15 @@ namespace StudentSuccessDashboard.Controllers
             }
 
             var userId =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier
+                );
 
-            if (userId == null)
+            var student =
+                await GetCurrentStudentAsync();
+
+            if (userId == null ||
+                student == null)
             {
                 return Unauthorized();
             }
@@ -147,7 +255,8 @@ namespace StudentSuccessDashboard.Controllers
             var existingSession =
                 await _context.StudySessions
                     .FirstOrDefaultAsync(s =>
-                        s.StudySessionId == id &&
+                        s.StudySessionId == id
+                        &&
                         s.UserId == userId);
 
             if (existingSession == null)
@@ -155,9 +264,34 @@ namespace StudentSuccessDashboard.Controllers
                 return NotFound();
             }
 
-            ModelState.Remove(nameof(StudySession.UserId));
-            ModelState.Remove(nameof(StudySession.User));
-            ModelState.Remove(nameof(StudySession.Course));
+            var courseBelongsToStudent =
+                await _context.Courses
+                    .AnyAsync(c =>
+                        c.CourseId
+                        == studySession.CourseId
+                        &&
+                        c.StudentId
+                        == student.StudentId);
+
+            if (!courseBelongsToStudent)
+            {
+                ModelState.AddModelError(
+                    nameof(StudySession.CourseId),
+                    "Please select one of your courses."
+                );
+            }
+
+            ModelState.Remove(
+                nameof(StudySession.UserId)
+            );
+
+            ModelState.Remove(
+                nameof(StudySession.User)
+            );
+
+            ModelState.Remove(
+                nameof(StudySession.Course)
+            );
 
             if (ModelState.IsValid)
             {
@@ -181,20 +315,23 @@ namespace StudentSuccessDashboard.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(
+                    nameof(Index)
+                );
             }
 
-            ViewBag.CourseId = new SelectList(
-                _context.Courses,
-                "CourseId",
-                "CourseName",
-                studySession.CourseId
-            );
+            ViewBag.CourseId =
+                await GetCourseSelectListAsync(
+                    studySession.CourseId
+                );
 
             return View(studySession);
         }
 
-        public async Task<IActionResult> Delete(int? id)
+
+        // GET: StudySessions/Delete/5
+        public async Task<IActionResult> Delete(
+            int? id)
         {
             if (id == null)
             {
@@ -202,7 +339,9 @@ namespace StudentSuccessDashboard.Controllers
             }
 
             var userId =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier
+                );
 
             if (userId == null)
             {
@@ -213,7 +352,8 @@ namespace StudentSuccessDashboard.Controllers
                 await _context.StudySessions
                     .Include(s => s.Course)
                     .FirstOrDefaultAsync(s =>
-                        s.StudySessionId == id &&
+                        s.StudySessionId == id
+                        &&
                         s.UserId == userId);
 
             if (studySession == null)
@@ -224,12 +364,17 @@ namespace StudentSuccessDashboard.Controllers
             return View(studySession);
         }
 
+
+        // POST: StudySessions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult>
+            DeleteConfirmed(int id)
         {
             var userId =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier
+                );
 
             if (userId == null)
             {
@@ -239,7 +384,8 @@ namespace StudentSuccessDashboard.Controllers
             var studySession =
                 await _context.StudySessions
                     .FirstOrDefaultAsync(s =>
-                        s.StudySessionId == id &&
+                        s.StudySessionId == id
+                        &&
                         s.UserId == userId);
 
             if (studySession == null)
@@ -247,35 +393,55 @@ namespace StudentSuccessDashboard.Controllers
                 return NotFound();
             }
 
-            _context.StudySessions.Remove(studySession);
+            _context.StudySessions.Remove(
+                studySession
+            );
+
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(
+                nameof(Index)
+            );
         }
 
-        public IActionResult Timer()
+
+        // GET: StudySessions/Timer
+        public async Task<IActionResult> Timer()
         {
-            ViewBag.CourseId = new SelectList(
-                _context.Courses,
-                "CourseId",
-                "CourseName"
-            );
+            var courseList =
+                await GetCourseSelectListAsync();
+
+            if (courseList == null)
+            {
+                return Unauthorized();
+            }
+
+            ViewBag.CourseId = courseList;
 
             return View();
         }
 
+
+        // POST: StudySessions/SaveTimerSession
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveTimerSession(
-            int CourseId,
-            string Topic,
-            string? Notes,
-            int DurationMinutes)
+        public async Task<IActionResult>
+            SaveTimerSession(
+                int CourseId,
+                string Topic,
+                string? Notes,
+                int DurationMinutes)
         {
             var userId =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier
+                );
 
-            if (userId == null)
+            var student =
+                await GetCurrentStudentAsync();
+
+            if (userId == null ||
+                student == null)
             {
                 return Unauthorized();
             }
@@ -287,23 +453,49 @@ namespace StudentSuccessDashboard.Controllers
                 return BadRequest();
             }
 
-            var studySession = new StudySession
+            var courseBelongsToStudent =
+                await _context.Courses
+                    .AnyAsync(c =>
+                        c.CourseId == CourseId
+                        &&
+                        c.StudentId
+                        == student.StudentId);
+
+            if (!courseBelongsToStudent)
             {
-                CourseId = CourseId,
-                Topic = Topic,
-                Notes = Notes,
-                DurationMinutes = DurationMinutes,
+                return BadRequest();
+            }
 
-                // PostgreSQL requires UTC
-                SessionDate = DateTime.UtcNow,
+            var studySession =
+                new StudySession
+                {
+                    CourseId = CourseId,
 
-                UserId = userId
-            };
+                    Topic = Topic.Trim(),
 
-            _context.StudySessions.Add(studySession);
+                    Notes =
+                        string.IsNullOrWhiteSpace(Notes)
+                            ? null
+                            : Notes.Trim(),
+
+                    DurationMinutes =
+                        DurationMinutes,
+
+                    SessionDate =
+                        DateTime.UtcNow,
+
+                    UserId = userId
+                };
+
+            _context.StudySessions.Add(
+                studySession
+            );
+
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(
+                nameof(Index)
+            );
         }
     }
 }
