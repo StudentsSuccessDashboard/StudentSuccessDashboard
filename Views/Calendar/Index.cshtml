@@ -3,10 +3,7 @@
 @{
     ViewData["Title"] = "Academic Calendar";
 
-    var displayMonth =
-        ViewBag.DisplayMonth is DateTime month
-            ? month
-            : new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+    var displayMonth = (DateTime)ViewBag.DisplayMonth;
 
     var previousYear = (int)ViewBag.PreviousYear;
     var previousMonth = (int)ViewBag.PreviousMonth;
@@ -26,327 +23,347 @@
         ViewBag.Exams as List<Exam>
         ?? new List<Exam>();
 
+    var firstDayOfMonth =
+        new DateTime(
+            displayMonth.Year,
+            displayMonth.Month,
+            1
+        );
+
     var daysInMonth =
         DateTime.DaysInMonth(
             displayMonth.Year,
             displayMonth.Month
         );
 
-    var firstDayOfWeek =
-        (int)displayMonth.DayOfWeek;
+    var startingColumn =
+        (int)firstDayOfMonth.DayOfWeek;
 
-    var today = DateTime.Today;
-
-    var totalCalendarCells =
-        firstDayOfWeek + daysInMonth;
+    var totalCells =
+        startingColumn + daysInMonth;
 
     var numberOfRows =
-        (int)Math.Ceiling(totalCalendarCells / 7.0);
+        (int)Math.Ceiling(
+            totalCells / 7.0
+        );
+
+    var today =
+        DateTime.UtcNow.Date;
 }
 
-<div class="container-fluid">
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div>
+        <h1 class="mb-1">
+            Academic Calendar
+        </h1>
 
-        <div>
-            <h1 class="mb-1">
-                Academic Calendar
-            </h1>
-
-            <p class="text-muted mb-0">
-                View assignments, quizzes, and exams by date.
-            </p>
-        </div>
-
-        <a asp-controller="Dashboard"
-           asp-action="Index"
-           class="btn btn-outline-secondary">
-            Back to Dashboard
-        </a>
-
+        <p class="text-muted mb-0">
+            View assignments, quizzes, and exams by date.
+        </p>
     </div>
 
-    <div class="card shadow-sm mb-4">
+    <a asp-controller="Dashboard"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Back to Dashboard
+    </a>
 
-        <div class="card-body">
+</div>
 
-            <div class="d-flex justify-content-between align-items-center">
 
-                <a asp-controller="Calendar"
-                   asp-action="Index"
-                   asp-route-year="@previousYear"
-                   asp-route-month="@previousMonth"
-                   class="btn btn-outline-primary">
-                    Previous
-                </a>
+<div class="card shadow-sm mb-4">
 
-                <div class="text-center">
+    <div class="card-body">
 
-                    <h2 class="mb-0">
-                        @displayMonth.ToString("MMMM yyyy")
-                    </h2>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
-                    @if (displayMonth.Year != today.Year ||
-                                        displayMonth.Month != today.Month)
-                    {
-                        <a asp-controller="Calendar"
-                           asp-action="Index"
-                           asp-route-year="@today.Year"
-                           asp-route-month="@today.Month"
-                           class="btn btn-link btn-sm text-decoration-none">
-                            Return to Current Month
-                        </a>
-                    }
+            <a asp-action="Index"
+               asp-route-year="@previousYear"
+               asp-route-month="@previousMonth"
+               class="btn btn-outline-primary">
+                Previous
+            </a>
 
-                </div>
+            <div class="text-center">
 
-                <a asp-controller="Calendar"
-                   asp-action="Index"
-                   asp-route-year="@nextYear"
-                   asp-route-month="@nextMonth"
-                   class="btn btn-outline-primary">
-                    Next
+                <h2 class="mb-1">
+                    @displayMonth.ToString("MMMM yyyy")
+                </h2>
+
+                <a asp-action="Index"
+                   class="btn btn-sm btn-outline-secondary">
+                    Return to Current Month
                 </a>
 
             </div>
 
-        </div>
-
-    </div>
-
-    <div class="d-flex flex-wrap gap-3 mb-3">
-
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-primary">
-                Assignment
-            </span>
-        </div>
-
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-success">
-                Quiz
-            </span>
-        </div>
-
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-danger">
-                Exam
-            </span>
-        </div>
-
-    </div>
-
-    <div class="card shadow-sm">
-
-        <div class="card-body p-0">
-
-            <div class="table-responsive">
-
-                <table class="table table-bordered mb-0 align-top"
-                       style="table-layout: fixed; min-width: 900px;">
-
-                    <thead>
-                        <tr class="text-center">
-
-                            <th class="py-3">
-                                Sunday
-                            </th>
-
-                            <th class="py-3">
-                                Monday
-                            </th>
-
-                            <th class="py-3">
-                                Tuesday
-                            </th>
-
-                            <th class="py-3">
-                                Wednesday
-                            </th>
-
-                            <th class="py-3">
-                                Thursday
-                            </th>
-
-                            <th class="py-3">
-                                Friday
-                            </th>
-
-                            <th class="py-3">
-                                Saturday
-                            </th>
-
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        @{
-                            var currentDay = 1;
-                        }
-
-                        @for (var week = 0; week < numberOfRows; week++)
-                        {
-                            <tr>
-
-                                @for (var dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++)
-                                {
-                                    var cellNumber =
-                                    (week * 7) + dayOfWeek;
-
-                                    var shouldDisplayDay =
-                                    cellNumber >= firstDayOfWeek &&
-                                    currentDay <= daysInMonth;
-
-                                    if (shouldDisplayDay)
-                                    {
-                                        var currentDate =
-                                        new DateTime(
-                                        displayMonth.Year,
-                                        displayMonth.Month,
-                                        currentDay
-                                        );
-
-                                        var isToday =
-                                        currentDate.Date == today.Date;
-
-                                        var dayAssignments =
-                                        assignments
-                                        .Where(a =>
-                                        a.DueDate.Year == currentDate.Year &&
-                                        a.DueDate.Month == currentDate.Month &&
-                                        a.DueDate.Day == currentDate.Day)
-                                        .ToList();
-
-                                        var dayQuizzes =
-                                        quizzes
-                                        .Where(q =>
-                                        q.DueDate.Year == currentDate.Year &&
-                                        q.DueDate.Month == currentDate.Month &&
-                                        q.DueDate.Day == currentDate.Day)
-                                        .ToList();
-
-                                        var dayExams =
-                                        exams
-                                        .Where(e =>
-                                        e.ExamDate.Year == currentDate.Year &&
-                                        e.ExamDate.Month == currentDate.Month &&
-                                        e.ExamDate.Day == currentDate.Day)
-                                        .ToList();
-
-                                        <td style="height: 170px;"
-                                            class="p-2 @(isToday ? "bg-light" : "")">
-
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-
-                                                <strong class="@(isToday ? "text-primary" : "")">
-                                                    @currentDay
-                                                </strong>
-
-                                                @if (isToday)
-                                                {
-                                                    <span class="badge bg-primary">
-                                                        Today
-                                                    </span>
-                                                }
-
-                                            </div>
-
-                                            @foreach (var assignment in dayAssignments)
-                                            {
-                                                <a asp-controller="Assignments"
-                                                   asp-action="Details"
-                                                   asp-route-id="@assignment.AssignmentId"
-                                                   class="d-block text-decoration-none mb-1">
-
-                                                    <div class="badge bg-primary text-wrap w-100 text-start p-2">
-
-                                                        <strong>
-                                                            @assignment.Title
-                                                        </strong>
-
-                                                        <br />
-
-                                                        <small>
-                                                            @assignment.Course.CourseName
-                                                        </small>
-
-                                                    </div>
-
-                                                </a>
-                                            }
-
-                                            @foreach (var quiz in dayQuizzes)
-                                            {
-                                                <a asp-controller="Quizzes"
-                                                   asp-action="Details"
-                                                   asp-route-id="@quiz.QuizId"
-                                                   class="d-block text-decoration-none mb-1">
-
-                                                    <div class="badge bg-success text-wrap w-100 text-start p-2">
-
-                                                        <strong>
-                                                            @quiz.QuizName
-                                                        </strong>
-
-                                                        <br />
-
-                                                        <small>
-                                                            @quiz.Course.CourseName
-                                                        </small>
-
-                                                    </div>
-
-                                                </a>
-                                            }
-
-                                            @foreach (var exam in dayExams)
-                                            {
-                                                <a asp-controller="Exams"
-                                                   asp-action="Details"
-                                                   asp-route-id="@exam.ExamId"
-                                                   class="d-block text-decoration-none mb-1">
-
-                                                    <div class="badge bg-danger text-wrap w-100 text-start p-2">
-
-                                                        <strong>
-                                                            @exam.ExamName
-                                                        </strong>
-
-                                                        <br />
-
-                                                        <small>
-                                                            @exam.Course.CourseName
-                                                        </small>
-
-                                                    </div>
-
-                                                </a>
-                                            }
-
-                                        </td>
-
-                                        currentDay++;
-                                    }
-                                    else
-                                    {
-                                        <td style="height: 170px;"
-                                            class="bg-light">
-                                        </td>
-                                    }
-                                }
-
-                            </tr>
-                        }
-
-                    </tbody>
-
-                </table>
-
-            </div>
+            <a asp-action="Index"
+               asp-route-year="@nextYear"
+               asp-route-month="@nextMonth"
+               class="btn btn-outline-primary">
+                Next
+            </a>
 
         </div>
 
     </div>
 
 </div>
+
+
+<div class="card shadow-sm mb-4">
+
+    <div class="card-body py-3">
+
+        <div class="d-flex flex-wrap align-items-center gap-3">
+
+            <strong>
+                Event Types:
+            </strong>
+
+            <span class="badge bg-primary">
+                Assignment
+            </span>
+
+            <span class="badge bg-success">
+                Quiz
+            </span>
+
+            <span class="badge bg-danger">
+                Exam
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered calendar-table mb-0">
+
+                <thead>
+
+                    <tr class="text-center">
+
+                        <th>Sunday</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @{
+                        var currentDay = 1;
+                    }
+
+                    @for (var row = 0; row < numberOfRows; row++)
+                    {
+                        <tr>
+
+                            @for (var column = 0; column < 7; column++)
+                            {
+                                var cellIndex =
+                                (row * 7) + column;
+
+                                if (cellIndex < startingColumn
+                                || currentDay > daysInMonth)
+                                {
+                                    <td class="calendar-empty">
+                                    </td>
+                                }
+                                else
+                                {
+                                    var currentDate =
+                                    new DateTime(
+                                    displayMonth.Year,
+                                    displayMonth.Month,
+                                    currentDay
+                                    );
+
+                                    var dayAssignments =
+                                    assignments
+                                    .Where(a =>
+                                    a.DueDate.Date
+                                    == currentDate.Date)
+                                    .ToList();
+
+                                    var dayQuizzes =
+                                    quizzes
+                                    .Where(q =>
+                                    q.DueDate.Date
+                                    == currentDate.Date)
+                                    .ToList();
+
+                                    var dayExams =
+                                    exams
+                                    .Where(e =>
+                                    e.ExamDate.Date
+                                    == currentDate.Date)
+                                    .ToList();
+
+                                    var isToday =
+                                    currentDate.Date
+                                    == today;
+
+                                    <td class="calendar-day @(isToday ? "calendar-today" : "")">
+
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                            <strong class="calendar-date-number">
+                                                @currentDay
+                                            </strong>
+
+                                            @if (isToday)
+                                            {
+                                                <span class="badge bg-dark">
+                                                    Today
+                                                </span>
+                                            }
+
+                                        </div>
+
+
+                                        <div class="d-grid gap-1">
+
+                                            @foreach (var assignment in dayAssignments)
+                                            {
+                                                <a asp-controller="Assignments"
+                                                   asp-action="Details"
+                                                   asp-route-id="@assignment.AssignmentId"
+                                                   class="badge bg-primary text-decoration-none text-start text-wrap">
+
+                                                    @assignment.Title
+
+                                                    @if (assignment.Course != null)
+                                                    {
+                                                        <span>
+                                                            · @assignment.Course.CourseName
+                                                        </span>
+                                                    }
+
+                                                </a>
+                                            }
+
+
+                                            @foreach (var quiz in dayQuizzes)
+                                            {
+                                                <a asp-controller="Quizzes"
+                                                   asp-action="Details"
+                                                   asp-route-id="@quiz.QuizId"
+                                                   class="badge bg-success text-decoration-none text-start text-wrap">
+
+                                                    @quiz.QuizName
+
+                                                    @if (quiz.Course != null)
+                                                    {
+                                                        <span>
+                                                            · @quiz.Course.CourseName
+                                                        </span>
+                                                    }
+
+                                                </a>
+                                            }
+
+
+                                            @foreach (var exam in dayExams)
+                                            {
+                                                <a asp-controller="Exams"
+                                                   asp-action="Details"
+                                                   asp-route-id="@exam.ExamId"
+                                                   class="badge bg-danger text-decoration-none text-start text-wrap">
+
+                                                    @exam.ExamName
+
+                                                    @if (exam.Course != null)
+                                                    {
+                                                        <span>
+                                                            · @exam.Course.CourseName
+                                                        </span>
+                                                    }
+
+                                                </a>
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+                                    currentDay++;
+                                }
+                            }
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .calendar-table {
+        table-layout: fixed;
+        min-width: 900px;
+    }
+
+        .calendar-table th {
+            font-weight: 650;
+            padding: 0.9rem;
+        }
+
+    .calendar-day {
+        height: 150px;
+        vertical-align: top;
+        padding: 0.75rem !important;
+        background-color: var(--surface);
+    }
+
+    .calendar-empty {
+        background-color: var(--surface-soft) !important;
+    }
+
+    .calendar-date-number {
+        font-size: 1rem;
+        color: var(--text-heading);
+    }
+
+    .calendar-today {
+        box-shadow: inset 0 0 0 2px #0d6efd;
+        background-color: var(--primary-soft) !important;
+    }
+
+    .calendar-day .badge {
+        display: block;
+        width: 100%;
+        padding: 0.55rem 0.65rem;
+        line-height: 1.3;
+    }
+
+    .calendar-day a.badge:hover {
+        opacity: 0.88;
+        transform: translateY(-1px);
+    }
+
+</style>

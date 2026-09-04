@@ -4,53 +4,78 @@
     ViewData["Title"] = "Exam Details";
 }
 
-<h1>Exam Details</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
 
-<div>
-    <h4>Exam</h4>
-    <hr />
+    <div>
+        <h1 class="mb-1">Exam Details</h1>
+        <p class="text-muted mb-0">
+            Review the selected exam information.
+        </p>
+    </div>
 
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.ExamName)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.ExamName)
-        </dd>
+    <a asp-controller="Dashboard"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Back to Dashboard
+    </a>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.ExamDate)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.ExamDate)
-        </dd>
-
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.PointsPossible)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.PointsPossible)
-        </dd>
-
-        <dt class="col-sm-3">
-            Course
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Course.CourseName)
-        </dd>
-    </dl>
 </div>
 
-<div class="d-flex flex-wrap gap-2">
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <dl class="row mb-0">
+
+            <dt class="col-sm-3">
+                Course
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Course.CourseName
+            </dd>
+
+            <dt class="col-sm-3">
+                Exam
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.ExamName
+            </dd>
+
+            <dt class="col-sm-3">
+                Exam Date
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.ExamDate.ToString("F")
+            </dd>
+
+            <dt class="col-sm-3">
+                Points Possible
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.PointsPossible
+            </dd>
+
+        </dl>
+
+    </div>
+
+</div>
+
+<div class="d-flex flex-wrap gap-2 mt-3">
+
     <a asp-action="Edit"
        asp-route-id="@Model.ExamId"
        class="btn btn-primary">
-        Edit
+        Edit Exam
     </a>
 
     <a asp-action="Index"
        class="btn btn-secondary">
-        Back to List
+        Back to Exams
     </a>
 
     <a asp-controller="Calendar"
@@ -60,4 +85,5 @@
        class="btn btn-outline-primary">
         Back to Calendar
     </a>
+
 </div>

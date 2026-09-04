@@ -3,137 +3,291 @@
 @{
     ViewData["Title"] = "Grades";
 
-    var courseAverages =
-        ViewBag.CourseAverages as Dictionary<int, double>
-        ?? new Dictionary<int, double>();
+    var courseGroups = Model
+        .Where(g => g.Course != null)
+        .GroupBy(g => g.Course)
+        .ToList();
 }
 
-<h1>Grades</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
 
-@if (ViewBag.CumulativeGpa != null)
+    <div>
+        <h1 class="mb-1">Grades</h1>
+
+        <p class="text-muted mb-0">
+            Track grades, course averages, grading weights, and cumulative GPA.
+        </p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+
+        <a asp-action="Create"
+           class="btn btn-primary">
+            Add Grade
+        </a>
+
+        <a asp-controller="Dashboard"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Back to Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <p class="text-muted mb-1">
+                    Cumulative GPA
+                </p>
+
+                <h2 class="mb-0">
+                    @string.Format("{0:F2}", ViewBag.CumulativeGpa)
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <p class="text-muted mb-1">
+                    Courses With Grades
+                </p>
+
+                <h2 class="mb-0">
+                    @courseGroups.Count
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <p class="text-muted mb-1">
+                    Grade Records
+                </p>
+
+                <h2 class="mb-0">
+                    @Model.Count()
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@if (courseGroups.Any())
 {
     <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h3 class="card-title">Cumulative GPA</h3>
 
-            <p class="display-6 mb-0">
-                @(((double)ViewBag.CumulativeGpa).ToString("0.00"))
-            </p>
+        <div class="card-header">
 
-            <small class="text-muted">
-                Based on current course averages and course credits.
-            </small>
+            <h4 class="mb-0">
+                Current Course Averages
+            </h4>
+
         </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                @foreach (var group in courseGroups)
+                {
+                    <div class="col-md-6 col-lg-4">
+
+                        <div class="border rounded p-3 h-100">
+
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+
+                                <div>
+
+                                    <strong>
+                                        @group.Key.CourseName
+                                    </strong>
+
+                                    @if (!string.IsNullOrWhiteSpace(group.Key.CourseCode))
+                                    {
+                                        <div class="text-muted small">
+                                            @group.Key.CourseCode
+                                        </div>
+                                    }
+
+                                </div>
+
+                                @if (ViewBag.CourseAverages != null
+                                                        && ViewBag.CourseAverages.ContainsKey(group.Key.CourseId))
+                                {
+                                    <span class="badge bg-primary fs-6">
+
+                                        @string.Format(
+                                        "{0:F2}%",
+                                                        ViewBag.CourseAverages[group.Key.CourseId]
+                                                        )
+
+                        </span>
+                                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
     </div>
 }
 
-<p>
-    <a asp-action="Create" class="btn btn-success">
-        Add Grade
-    </a>
-</p>
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">
-        No grades have been entered yet.
+    <div class="card shadow-sm">
+
+        <div class="card-body text-center py-5">
+
+            <h4>No Grades Yet</h4>
+
+            <p class="text-muted">
+                Add your first grade record to begin calculating
+                course averages and cumulative GPA.
+            </p>
+
+            <a asp-action="Create"
+               class="btn btn-primary">
+                Add Grade
+            </a>
+
+        </div>
+
     </div>
 }
 else
 {
-    <h3 class="mt-4">Current Course Averages</h3>
+    <div class="card shadow-sm">
 
-    <div class="row g-3 mb-4">
-        @foreach (var course in Model
-            .Where(g => g.Course != null)
-            .Select(g => g.Course)
-            .DistinctBy(c => c.CourseId))
-        {
-            var average = courseAverages.ContainsKey(course.CourseId)
-                ? courseAverages[course.CourseId]
-                : 0;
+        <div class="card-body">
 
-            <div class="col-md-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            @course.CourseName
-                        </h5>
+            <div class="table-responsive">
 
-                        <p class="card-text">
-                            Current Average:
-                            <strong>
-                                @average.ToString("0.00")%
-                            </strong>
-                        </p>
-                    </div>
-                </div>
+                <table class="table align-middle mb-0">
+
+                    <thead>
+
+                        <tr>
+                            <th>Course</th>
+                            <th>Category</th>
+                            <th>Score</th>
+                            <th>Weight</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <td>
+
+                                    <strong>
+                                        @item.Course.CourseName
+                                    </strong>
+
+                                </td>
+
+                                <td>
+                                    @item.Category
+                                </td>
+
+                                <td>
+
+                                    <span class="badge
+                                                @(item.Score >= 90
+                                                                                      ? "bg-success"
+                                                                                      : item.Score >= 80
+                                                                                          ? "bg-primary"
+                                                                                          : item.Score >= 70
+                                                                                              ? "bg-warning text-dark"
+                                                                                              : "bg-danger")">
+
+                                @item.Score.ToString("0.##")%
+
+                                    </span>
+
+                                </td>
+
+                                <td>
+                                    @item.Weight.ToString("0.##")%
+                                </td>
+
+                                <td class="text-end">
+
+                                    <div class="d-flex flex-wrap justify-content-end gap-2">
+
+                                        <a asp-action="Details"
+                                           asp-route-id="@item.GradeRecordId"
+                                           class="btn btn-outline-primary btn-sm">
+                                            Details
+                                        </a>
+
+                                        <a asp-action="Edit"
+                                           asp-route-id="@item.GradeRecordId"
+                                           class="btn btn-outline-warning btn-sm">
+                                            Edit
+                                        </a>
+
+                                        <a asp-action="Delete"
+                                           asp-route-id="@item.GradeRecordId"
+                                           class="btn btn-outline-danger btn-sm">
+                                            Delete
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                                        }
+
+                    </tbody>
+
+                </table>
+
             </div>
-        }
+
+        </div>
+
     </div>
-
-    <h3>Grade Records</h3>
-
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>
-                    Category
-                </th>
-                <th>
-                    Score
-                </th>
-                <th>
-                    Weight
-                </th>
-                <th>
-                    Course
-                </th>
-                <th></th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        @item.Category
-                    </td>
-
-                    <td>
-                        @item.Score.ToString("0.##")%
-                    </td>
-
-                    <td>
-                        @item.Weight.ToString("0.##")%
-                    </td>
-
-                    <td>
-                        @item.Course?.CourseName
-                    </td>
-
-                    <td>
-                        <a asp-action="Edit"
-                           asp-route-id="@item.GradeRecordId"
-                           class="btn btn-sm btn-primary">
-                            Edit
-                        </a>
-
-                        <a asp-action="Details"
-                           asp-route-id="@item.GradeRecordId"
-                           class="btn btn-sm btn-info">
-                            Details
-                        </a>
-
-                        <a asp-action="Delete"
-                           asp-route-id="@item.GradeRecordId"
-                           class="btn btn-sm btn-danger">
-                            Delete
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
 }

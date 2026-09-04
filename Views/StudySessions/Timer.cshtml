@@ -2,187 +2,421 @@
     ViewData["Title"] = "Study Timer";
 }
 
-<h1>Study Timer</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
 
-<p>
-    Use the timer to track a focused study session and save it when you are finished.
-</p>
+    <div>
+        <h1 class="mb-1">Study Timer</h1>
 
-<div class="mb-3">
-    <label for="courseId" class="form-label">Course</label>
-    <select id="courseId"
-            class="form-select"
-            asp-items="ViewBag.CourseId">
-        <option value="">Select a course</option>
-    </select>
-</div>
+        <p class="text-muted mb-0">
+            Track a focused study session and save the time directly
+            to your study history.
+        </p>
+    </div>
 
-<div class="mb-3">
-    <label for="topic" class="form-label">Topic</label>
-    <input id="topic"
-           class="form-control"
-           type="text" />
-</div>
-
-<div class="mb-3">
-    <label for="notes" class="form-label">Notes</label>
-    <textarea id="notes"
-              class="form-control"
-              rows="4"></textarea>
-</div>
-
-<div class="mb-4">
-    <h2 id="timerDisplay">00:00:00</h2>
-</div>
-
-<div class="mb-3">
-    <button id="startButton"
-            type="button"
-            class="btn btn-success">
-        Start
-    </button>
-
-    <button id="pauseButton"
-            type="button"
-            class="btn btn-warning">
-        Pause
-    </button>
-
-    <button id="resetButton"
-            type="button"
-            class="btn btn-secondary">
-        Reset
-    </button>
-
-    <button id="saveButton"
-            type="button"
-            class="btn btn-primary">
-        Save Session
-    </button>
-</div>
-
-<div id="timerMessage"
-     class="mt-3">
-</div>
-
-<p>
-    <a asp-action="Index"
+    <a asp-controller="Dashboard"
+       asp-action="Index"
        class="btn btn-outline-secondary">
-        Back to Study Sessions
+        Back to Dashboard
     </a>
-</p>
 
-<form id="saveSessionForm"
-      asp-action="SaveTimerSession"
-      method="post">
+</div>
 
-    @Html.AntiForgeryToken()
+<div class="row justify-content-center">
 
-    <input type="hidden"
-           id="hiddenCourseId"
-           name="CourseId" />
+    <div class="col-lg-8">
 
-    <input type="hidden"
-           id="hiddenTopic"
-           name="Topic" />
+        <div class="card shadow-sm">
 
-    <input type="hidden"
-           id="hiddenNotes"
-           name="Notes" />
+            <div class="card-body p-4">
 
-    <input type="hidden"
-           id="hiddenDurationMinutes"
-           name="DurationMinutes" />
-</form>
+                <form asp-action="SaveTimerSession"
+                      method="post"
+                      id="timerForm">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label for="CourseId"
+                                   class="form-label">
+                                Course
+                            </label>
+
+                            <select id="CourseId"
+                                    name="CourseId"
+                                    class="form-select"
+                                    asp-items="ViewBag.CourseId"
+                                    required>
+
+                                <option value="">
+                                    Select a course
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label for="Topic"
+                                   class="form-label">
+                                Study Topic
+                            </label>
+
+                            <input id="Topic"
+                                   name="Topic"
+                                   class="form-control"
+                                   placeholder="Example: Exam review"
+                                   required />
+
+                        </div>
+
+                        <div class="col-12">
+
+                            <label for="Notes"
+                                   class="form-label">
+                                Notes
+                            </label>
+
+                            <textarea id="Notes"
+                                      name="Notes"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Optional notes about this study session">
+                            </textarea>
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-center my-5">
+
+                        <p class="text-muted mb-2">
+                            Current Study Time
+                        </p>
+
+                        <div id="timerDisplay"
+                             class="display-1 fw-bold mb-4"
+                             style="font-variant-numeric: tabular-nums;">
+                            00:00:00
+                        </div>
+
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+
+                            <button type="button"
+                                    id="startButton"
+                                    class="btn btn-success btn-lg">
+                                Start
+                            </button>
+
+                            <button type="button"
+                                    id="pauseButton"
+                                    class="btn btn-warning btn-lg"
+                                    disabled>
+                                Pause
+                            </button>
+
+                            <button type="button"
+                                    id="resetButton"
+                                    class="btn btn-outline-secondary btn-lg">
+                                Reset
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <input type="hidden"
+                           id="DurationMinutes"
+                           name="DurationMinutes"
+                           value="0" />
+
+                    <div class="border rounded p-3 mb-4 bg-light">
+
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+                            <div>
+
+                                <strong>
+                                    Session Time to Save
+                                </strong>
+
+                                <div class="text-muted small"
+                                     id="saveTimeSummary">
+                                    Start the timer to begin recording your session.
+                                </div>
+
+                            </div>
+
+                            <span class="badge bg-primary fs-6"
+                                  id="minuteBadge">
+                                0 min
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-between gap-2">
+
+                        <a asp-action="Index"
+                           class="btn btn-secondary">
+                            Back to Study Sessions
+                        </a>
+
+                        <button type="submit"
+                                id="saveButton"
+                                class="btn btn-primary"
+                                disabled>
+                            Save Study Session
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 <script>
-    let elapsedSeconds = 0;
-    let timerInterval = null;
+    document.addEventListener("DOMContentLoaded", function () {
 
-    const timerDisplay = document.getElementById("timerDisplay");
-    const startButton = document.getElementById("startButton");
-    const pauseButton = document.getElementById("pauseButton");
-    const resetButton = document.getElementById("resetButton");
-    const saveButton = document.getElementById("saveButton");
+        const timerDisplay =
+            document.getElementById("timerDisplay");
 
-    const courseId = document.getElementById("courseId");
-    const topic = document.getElementById("topic");
-    const notes = document.getElementById("notes");
+        const startButton =
+            document.getElementById("startButton");
 
-    const hiddenCourseId = document.getElementById("hiddenCourseId");
-    const hiddenTopic = document.getElementById("hiddenTopic");
-    const hiddenNotes = document.getElementById("hiddenNotes");
-    const hiddenDurationMinutes = document.getElementById("hiddenDurationMinutes");
+        const pauseButton =
+            document.getElementById("pauseButton");
 
-    const timerMessage = document.getElementById("timerMessage");
-    const saveSessionForm = document.getElementById("saveSessionForm");
+        const resetButton =
+            document.getElementById("resetButton");
 
-    function updateTimerDisplay() {
-        const hours = Math.floor(elapsedSeconds / 3600);
-        const minutes = Math.floor((elapsedSeconds % 3600) / 60);
-        const seconds = elapsedSeconds % 60;
+        const saveButton =
+            document.getElementById("saveButton");
 
-        timerDisplay.textContent =
-            String(hours).padStart(2, "0") + ":" +
-            String(minutes).padStart(2, "0") + ":" +
-            String(seconds).padStart(2, "0");
-    }
+        const durationInput =
+            document.getElementById("DurationMinutes");
 
-    startButton.addEventListener("click", function () {
-        if (timerInterval !== null) {
-            return;
+        const minuteBadge =
+            document.getElementById("minuteBadge");
+
+        const saveTimeSummary =
+            document.getElementById("saveTimeSummary");
+
+        const timerForm =
+            document.getElementById("timerForm");
+
+        let elapsedSeconds = 0;
+        let timerInterval = null;
+        let isRunning = false;
+
+
+        function formatTime(totalSeconds) {
+
+            const hours =
+                Math.floor(totalSeconds / 3600);
+
+            const minutes =
+                Math.floor(
+                    (totalSeconds % 3600) / 60
+                );
+
+            const seconds =
+                totalSeconds % 60;
+
+            return (
+                String(hours).padStart(2, "0")
+                + ":"
+                + String(minutes).padStart(2, "0")
+                + ":"
+                + String(seconds).padStart(2, "0")
+            );
         }
 
-        timerInterval = setInterval(function () {
-            elapsedSeconds++;
-            updateTimerDisplay();
-        }, 1000);
 
-        timerMessage.textContent = "";
-    });
+        function updateDisplay() {
 
-    pauseButton.addEventListener("click", function () {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    });
+            timerDisplay.textContent =
+                formatTime(elapsedSeconds);
 
-    resetButton.addEventListener("click", function () {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        elapsedSeconds = 0;
-        updateTimerDisplay();
-        timerMessage.textContent = "";
-    });
+            let minutesToSave = 0;
 
-    saveButton.addEventListener("click", function () {
-        if (courseId.value === "") {
-            timerMessage.textContent = "Please select a course.";
-            return;
+            if (elapsedSeconds > 0) {
+
+                minutesToSave =
+                    Math.max(
+                        1,
+                        Math.ceil(
+                            elapsedSeconds / 60
+                        )
+                    );
+            }
+
+            durationInput.value =
+                minutesToSave;
+
+            minuteBadge.textContent =
+                minutesToSave
+                + (minutesToSave === 1
+                    ? " min"
+                    : " min");
+
+            if (elapsedSeconds > 0) {
+
+                saveButton.disabled = false;
+
+                saveTimeSummary.textContent =
+                    "This session will be recorded as "
+                    + minutesToSave
+                    + (minutesToSave === 1
+                        ? " minute."
+                        : " minutes.");
+            }
+            else {
+
+                saveButton.disabled = true;
+
+                saveTimeSummary.textContent =
+                    "Start the timer to begin recording your session.";
+            }
         }
 
-        if (topic.value.trim() === "") {
-            timerMessage.textContent = "Please enter a topic.";
-            return;
+
+        function startTimer() {
+
+            if (isRunning) {
+                return;
+            }
+
+            isRunning = true;
+
+            startButton.disabled = true;
+            pauseButton.disabled = false;
+
+            timerInterval =
+                setInterval(function () {
+
+                    elapsedSeconds++;
+
+                    updateDisplay();
+
+                }, 1000);
         }
 
-        if (elapsedSeconds < 60) {
-            timerMessage.textContent =
-                "The timer must run for at least one minute before saving.";
-            return;
+
+        function pauseTimer() {
+
+            if (!isRunning) {
+                return;
+            }
+
+            clearInterval(timerInterval);
+
+            timerInterval = null;
+            isRunning = false;
+
+            startButton.disabled = false;
+            pauseButton.disabled = true;
+
+            startButton.textContent = "Resume";
         }
 
-        clearInterval(timerInterval);
-        timerInterval = null;
 
-        const durationMinutes = Math.ceil(elapsedSeconds / 60);
+        function resetTimer() {
 
-        hiddenCourseId.value = courseId.value;
-        hiddenTopic.value = topic.value;
-        hiddenNotes.value = notes.value;
-        hiddenDurationMinutes.value = durationMinutes;
+            if (timerInterval != null) {
 
-        saveSessionForm.submit();
+                clearInterval(
+                    timerInterval
+                );
+            }
+
+            timerInterval = null;
+            isRunning = false;
+            elapsedSeconds = 0;
+
+            startButton.disabled = false;
+            pauseButton.disabled = true;
+
+            startButton.textContent = "Start";
+
+            updateDisplay();
+        }
+
+
+        startButton.addEventListener(
+            "click",
+            startTimer
+        );
+
+
+        pauseButton.addEventListener(
+            "click",
+            pauseTimer
+        );
+
+
+        resetButton.addEventListener(
+            "click",
+            resetTimer
+        );
+
+
+        timerForm.addEventListener(
+            "submit",
+            function (event) {
+
+                if (elapsedSeconds <= 0) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Please start the timer before saving the study session."
+                    );
+
+                    return;
+                }
+
+                const course =
+                    document.getElementById(
+                        "CourseId"
+                    ).value;
+
+                const topic =
+                    document.getElementById(
+                        "Topic"
+                    ).value.trim();
+
+                if (!course || !topic) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Please select a course and enter a study topic before saving."
+                    );
+
+                    return;
+                }
+
+                if (timerInterval != null) {
+
+                    clearInterval(
+                        timerInterval
+                    );
+                }
+
+                updateDisplay();
+            }
+        );
+
+
+        updateDisplay();
     });
-
-    updateTimerDisplay();
 </script>

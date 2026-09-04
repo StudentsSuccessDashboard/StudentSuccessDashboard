@@ -4,67 +4,163 @@
     ViewData["Title"] = "Study Sessions";
 }
 
-<h1>Study Sessions</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
 
-<p>
-    Track your study activity and review previous study sessions.
-</p>
+    <div>
+        <h1 class="mb-1">Study Sessions</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-success">
-        Add Study Session
-    </a>
+        <p class="text-muted mb-0">
+            Track your study time and review your recent study activity.
+        </p>
+    </div>
 
-    <a asp-action="Timer" class="btn btn-primary">
-        Start Study Timer
-    </a>
-</p>
+    <div class="d-flex flex-wrap gap-2">
+
+        <a asp-action="Create"
+           class="btn btn-primary">
+            Add Study Session
+        </a>
+
+        <a asp-action="Timer"
+           class="btn btn-outline-primary">
+            Start Study Timer
+        </a>
+
+        <a asp-controller="Dashboard"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Back to Dashboard
+        </a>
+
+    </div>
+
+</div>
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">
-        No study sessions have been recorded yet.
+    <div class="card shadow-sm">
+
+        <div class="card-body text-center py-5">
+
+            <h4>No Study Sessions Yet</h4>
+
+            <p class="text-muted">
+                Record a study session manually or use the study timer
+                to begin tracking your study activity.
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+
+                <a asp-action="Create"
+                   class="btn btn-primary">
+                    Add Study Session
+                </a>
+
+                <a asp-action="Timer"
+                   class="btn btn-outline-primary">
+                    Start Timer
+                </a>
+
+            </div>
+
+        </div>
+
     </div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Course</th>
-                <th>Topic</th>
-                <th>Duration</th>
-                <th>Notes</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+    <div class="card shadow-sm">
 
-        <tbody>
-            @foreach (var session in Model)
-            {
-                <tr>
-                    <td>@session.SessionDate.ToShortDateString()</td>
-                    <td>@session.Course.CourseName</td>
-                    <td>@session.Topic</td>
-                    <td>@session.DurationMinutes minutes</td>
-                    <td>@session.Notes</td>
+        <div class="card-body">
 
-                    <td>
-                        <a asp-action="Edit"
-                           asp-route-id="@session.StudySessionId"
-                           class="btn btn-sm btn-primary">
-                            Edit
-                        </a>
+            <div class="table-responsive">
 
-                        <a asp-action="Delete"
-                           asp-route-id="@session.StudySessionId"
-                           class="btn btn-sm btn-danger">
-                            Delete
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                <table class="table align-middle mb-0">
+
+                    <thead>
+
+                        <tr>
+                            <th>Course</th>
+                            <th>Topic</th>
+                            <th>Date</th>
+                            <th>Duration</th>
+                            <th>Notes</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    @item.Course.CourseName
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        @item.Topic
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    @item.SessionDate.ToString("MMM d, yyyy h:mm tt")
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-primary">
+                                        @item.DurationMinutes min
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    @if (string.IsNullOrWhiteSpace(item.Notes))
+                                    {
+                                        <span class="text-muted">
+                                            No notes
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        @item.Notes
+                                    }
+
+                                </td>
+
+                                <td class="text-end">
+
+                                    <div class="d-flex flex-wrap justify-content-end gap-2">
+
+                                        <a asp-action="Edit"
+                                           asp-route-id="@item.StudySessionId"
+                                           class="btn btn-outline-warning btn-sm">
+                                            Edit
+                                        </a>
+
+                                        <a asp-action="Delete"
+                                           asp-route-id="@item.StudySessionId"
+                                           class="btn btn-outline-danger btn-sm">
+                                            Delete
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
 }
