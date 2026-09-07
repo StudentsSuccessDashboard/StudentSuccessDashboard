@@ -132,7 +132,10 @@ namespace StudentSuccessDashboard.Areas.Identity.Pages.Account
                         {
                             UserId = userId,
                             Email = Input.Email,
-                            Major = "Undeclared"
+                            FirstName = "Student",
+                            LastName = "User",
+                            Major = "Undeclared",
+                            GraduationYear = DateTime.UtcNow.Year + 4
                         };
 
                         _context.Students.Add(student);
