@@ -16,8 +16,10 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using StudentSuccessDashboard.Data;
+using StudentSuccessDashboard.Models;
 
 namespace StudentSuccessDashboard.Areas.Identity.Pages.Account
 {
@@ -29,13 +31,15 @@ namespace StudentSuccessDashboard.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly ApplicationDbContext _context;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -43,6 +47,7 @@ namespace StudentSuccessDashboard.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _context = context;
         }
 
         [BindProperty]
@@ -117,6 +122,21 @@ namespace StudentSuccessDashboard.Areas.Identity.Pages.Account
                         "User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
+
+                    // Create the Student record required by the rest of the application.
+                    var studentExists = await _context.Students
+                        .AnyAsync(s => s.UserId == userId);
+
+                    if (!studentExists)
+                    {
+                        var student = new Student
+                        {
+                            UserId = userId
+                        };
+
+                        _context.Students.Add(student);
+                        await _context.SaveChangesAsync();
+                    }
 
                     var code =
                         await _userManager.GenerateEmailConfirmationTokenAsync(user);
