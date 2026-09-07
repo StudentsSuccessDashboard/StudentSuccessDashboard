@@ -123,7 +123,6 @@ namespace StudentSuccessDashboard.Areas.Identity.Pages.Account
 
                     var userId = await _userManager.GetUserIdAsync(user);
 
-                    // Create the Student record required by the rest of the application.
                     var studentExists = await _context.Students
                         .AnyAsync(s => s.UserId == userId);
 
@@ -131,7 +130,9 @@ namespace StudentSuccessDashboard.Areas.Identity.Pages.Account
                     {
                         var student = new Student
                         {
-                            UserId = userId
+                            UserId = userId,
+                            Email = Input.Email,
+                            Major = "Undeclared"
                         };
 
                         _context.Students.Add(student);
